@@ -1,0 +1,23 @@
+exports.checkUsername=(app,connection)=>{
+  app.get('/checkUsername.do',(req,res)=>{
+    let sql=`SELECT U_LoginID FROM User WHERE U_LoginID="${req.query.username}"`;
+    connection.query(sql,(error,result)=>{
+      if(error){
+        console.log(error.message);
+        res.send({
+          code:10000,
+          data:null,
+          msg:'查询用户表发生错误',
+          success:false
+        })
+      }else{
+        res.send({
+          code:10000,
+          data:result,
+          msg:'',
+          success:true
+        })
+      }
+    });
+  })
+};
