@@ -4,7 +4,7 @@ import {MessageBox} from 'element-ui'
 
 axios.interceptors.response.use((res) =>{
   if(!res.data.success){
-    Message.error(res.data.msg)
+    res.data.msg&&Message.error(res.data.msg)
   }
   return res;
 });

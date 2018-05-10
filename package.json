@@ -1,8 +1,8 @@
 {
-  "name": "nsc_web",
+  "name": "gg",
   "version": "1.0.0",
   "description": "A Vue.js project",
-  "author": "gw",
+  "author": "gw <2132>",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "element-ui": "^2.2.1",
+    "element-ui": "^2.2.2",
+    "font-awesome": "^4.7.0",
     "less": "^3.0.1",
     "less-loader": "^4.1.0",
-    "socket.io": "^2.0.4",
     "socket.io-client": "^2.0.4",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",

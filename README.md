@@ -1,4 +1,4 @@
-# nsc_web
+# gg
 
 > A Vue.js project
 

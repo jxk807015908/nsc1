@@ -47,12 +47,13 @@
     background:#38ADFF;
     padding-top:0;
     padding-bottom:0;
-    line-height:49px;
+    line-height:35px;
     span{
       color:#fff;
     }
     .el-dialog__headerbtn{
-      font-size:24px;
+      font-size:20px;
+      top: 8px;
       i{
         color:#fff;
       }
@@ -60,11 +61,11 @@
   }
   .dialog-footer{
     text-align: center;
-    margin-bottom:20px;
     margin-top:10px;
     position: relative;
   }
   .el-dialog__body{
+    padding-top: 10px;
     padding-bottom:0;
     label{
       margin-right:8px;

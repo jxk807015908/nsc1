@@ -17,6 +17,10 @@ export const timeFormat = (time, format) => {
 };
 export const setCookie=(cname,cvalue,exdays)=>
 {
+  if(exdays==undefined){
+    document.cookie = cname + "=" + cvalue + "; "
+    return
+  }
   var d = new Date();
   d.setTime(d.getTime()+(exdays*24*60*60*1000));
   var expires = "expires="+d.toGMTString();
@@ -32,6 +36,28 @@ export const getCookie=(cname)=>
     if (c.indexOf(name)==0) return c.substring(name.length,c.length);
   }
   return "";
+}
+//获取图片数据
+export const getBase64Image=(img)=>{
+  var canvas = document.createElement("canvas");
+  canvas.width = img.width;
+  canvas.height = img.height;
+  var ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, img.width, img.height);
+  var ext = img.src.substring(img.src.lastIndexOf(".")+1).toLowerCase();
+  var dataURL = canvas.toDataURL("image/"+ext);
+
+  // return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+  return dataURL;
+};
+export const getStyle = (obj,attr)=>
+{
+  if(obj.currentStyle)
+  {
+    return obj.currentStyle[attr];
+  }
+  else
+    return getComputedStyle(obj,null)[attr];//放null参数的那个地方放false也可以，只要带一个参数，值您任意，高兴就好。
 }
 //打印
 export const one_print = (content) => {
@@ -53,7 +79,48 @@ export const getTop = (e) => {
     y += e.offsetTop;
   }
   return y;
-}
+};
+export const getExpressName=(message)=>{
+  let arr=[];
+  let match=message.match(/\{[0-9a-zA-Z]+(\-\g+){0,1}\}/ig);
+  match&&match.forEach(value => {
+    arr.push(value.split('}')[0].split('{')[1]);
+  })
+  return arr
+};
+export const translateExpress=(type,message,imgArr,ip)=>{
+  if(type===1){
+    if(imgArr.constructor===Array){
+      imgArr.forEach((imgObj, index) => {
+        var reg=new RegExp('{'+imgObj.name+'}','ig')
+        message=message.replace(reg,`<img src="data:image/png;base64,${imgObj.img}" />`)
+      });
+    }else{
+      alert('imgArr不是数组')
+    }
+  }else if(type===2){
+    console.log(imgArr)
+    if(imgArr.constructor===Array){
+      imgArr.forEach((imgName, index) => {
+        var reg=new RegExp('{'+imgName.split('.')[0]+'}','ig')
+        message=message.replace(reg,`<img src="http://${ip}/express/${imgName}" />`)
+      });
+    }else{
+      alert('imgArr不是数组')
+    }
+  }
+  return message;
+};
+export const toBottom=(box)=>{
+  box.scrollTop=box.scrollHeight-box.offsetHeight;
+};
+export const onToTop=(box,callback)=>{
+  box.onscroll = ()=>{
+    if(box.scrollTop === 0){
+      callback();
+    }
+  }
+};
 //弹出提示框
 export const tipBox = (txt, fn1, fn2) => {
   MessageBox.confirm(txt, '提示', {

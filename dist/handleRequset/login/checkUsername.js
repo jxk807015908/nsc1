@@ -1,17 +1,26 @@
-exports.checkUsername=(app,connection)=>{
-  app.get('/checkUsername.do',(req,res)=>{
-    let sql=`SELECT U_LoginID FROM User WHERE U_LoginID="${req.query.username}"`;
-    connection.query(sql,(error,result)=>{
-      if(error){
-        console.log(error.message);
-        res.send({
+const searchUser=require("../../businessLayer/user/searchUser");
+exports.checkUserId=(app)=>{
+  app.get('/checkUserId.do',(req,res)=>{
+    let isSend=false;
+    res.setTimeout(3000,()=>{
+      isSend=true;
+      res.send({
+        code:10000,
+        data:null,
+        msg:'连接超时',
+        success:false
+      });
+    });
+    searchUser.searchUser({userId:req.query.userId},(result)=>{
+      if(result==='error'){
+        (!isSend)&&res.send({
           code:10000,
           data:null,
           msg:'查询用户表发生错误',
           success:false
         })
       }else{
-        res.send({
+        (!isSend)&&res.send({
           code:10000,
           data:result,
           msg:'',

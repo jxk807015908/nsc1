@@ -4,8 +4,8 @@
     <div class="warp">
       <div v-show="!isRegister" class="login-warp">
         <div class="input-group">
-          <label for="username">账号:</label>
-          <el-input v-model="username" id="username"></el-input>
+          <label for="userId">账号:</label>
+          <el-input v-model="userId" id="userId"></el-input>
         </div>
         <div class="input-group">
           <label for="password">密码:</label>
@@ -24,28 +24,28 @@
         </div>
       </div>
       <div v-show="isRegister" class="register-warp">
-        <label for="rUsername">账号:</label>
-        <el-input v-model="registerParams.username" id="rUsername" @blur="checkUsername"></el-input>
-        <div class="tip">
-          <el-alert v-if="tip.username==1" title="该用户已注册" type="error" :closable="false"></el-alert>
-          <el-alert v-if="tip.username==3" title="可以注册" type="success" :closable="false"></el-alert>
-          <el-alert v-if="tip.username==2" title="用户名不能为空" type="error" :closable="false"></el-alert>
+        <label for="ruserId">账号:</label>
+        <el-input v-model="registerParams.userId" id="ruserId" @blur="checkuserId"></el-input>
+        <div class="alerts">
+          <el-alert v-if="tip.userId==1" title="该用户已注册" type="error" :closable="false"></el-alert>
+          <el-alert v-if="tip.userId==3" title="可以注册" type="success" :closable="false"></el-alert>
+          <el-alert v-if="tip.userId==2" title="用户名不能为空" type="error" :closable="false"></el-alert>
         </div>
         <label for="rFPassword">密码:</label>
         <el-input v-model="registerParams.fPassword" id="rFPassword" type="password" @blur="checkFPassword"></el-input>
-        <div class="tip">
+        <div class="alerts">
           <el-alert v-if="tip.fPassword==1" title="密码不一致" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.fPassword==2" title="密码不能为空" type="error" :closable="false"></el-alert>
         </div>
         <label for="rSPassword">确认密码:</label>
         <el-input v-model="registerParams.sPassword" id="rSPassword" type="password" @blur="checkSPassword"></el-input>
-        <div class="tip">
+        <div class="alerts">
           <el-alert v-if="tip.sPassword==1" title="密码不一致" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.sPassword==2" title="密码不能为空" type="error" :closable="false"></el-alert>
         </div>
         <label for="email">邮箱:</label>
         <el-input v-model="registerParams.email" id="email" type="text" @blur="checkEmail"></el-input>
-        <div class="tip">
+        <div class="alerts">
           <el-alert v-if="tip.email==1" title="邮箱格式不正确" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.email==2" title="邮箱不能为空" type="error" :closable="false"></el-alert>
         </div>
@@ -65,16 +65,16 @@
             return {
               isRegister:false,
               isLoading:false,
-              username:'',
+              userId:'',
               password:'',
               registerParams:{
-                username:"",
+                userId:"",
                 fPassword:"",
                 sPassword:"",
                 email:""
               },
               tip:{
-                username:0,
+                userId:0,
                 fPassword:0,
                 sPassword:0,
                 email:0
@@ -82,12 +82,16 @@
             };
         },
         mounted(){
+          sessionStorage.clear();
+          this.$store.state.userId=null;
+          this.$store.state.nickName=null;
+          this.$store.state.socket=null;
           //alert(localStorage.isRemember.constructor);
           if(localStorage.isRemember=='true'){
             //alert(localStorage.isRemember);
-            // alert(getCookie('username'))
+            // alert(getCookie('userId'))
             this.$refs.remember.checked=true;
-            this.username=localStorage.username;
+            this.userId=localStorage.userId;
             this.password=localStorage.password;
           }
           //this.$store.dispatch('connectSocket')
@@ -129,17 +133,17 @@
           this.tip.fPassword=0;
           this.tip.sPassword=0;
         },
-        checkUsername(){
-          if(this.registerParams.username==''){
-            this.tip.username=2;
+        checkuserId(){
+          if(this.registerParams.userId==''){
+            this.tip.userId=2;
             return
           }
-          this.$http.get('/checkUsername.do',{params:{username:this.registerParams.username}}).then((res)=>{
+          this.$http.get('/checkuserId.do',{params:{userId:this.registerParams.userId}}).then((res)=>{
             if(res.data.success){
               if(res.data.data.length==0){
-                this.tip.username=3;
+                this.tip.userId=3;
               }else{
-                this.tip.username=1;
+                this.tip.userId=1;
               }
             }
           })
@@ -150,10 +154,10 @@
               this.tip[key]=2;
             }
           });
-          if(this.tip.username!=3||this.tip.email!=0||this.tip.fPassword!=0||this.tip.sPassword!=0)return;
+          if(this.tip.userId!=3||this.tip.email!=0||this.tip.fPassword!=0||this.tip.sPassword!=0)return;
           this.$http.get('/register.do',{
             params:{
-              username:this.registerParams.username,
+              userId:this.registerParams.userId,
               password:this.registerParams.fPassword,
               email:this.registerParams.email
             }
@@ -168,37 +172,37 @@
           localStorage.isRemember=this.$refs.remember.checked;
           //alert(!(localStorage.isRemember=='true'))
           if(!(localStorage.isRemember=='true')) {
-            localStorage.username='';
+            localStorage.userId='';
             localStorage.password='';
           }else{
-            localStorage.username=this.username;
+            localStorage.userId=this.userId;
             localStorage.password=this.password;
           }
         },
         login(){
           if(localStorage.isRemember==='true'){
-            localStorage.username=this.username;
+            localStorage.userId=this.userId;
             localStorage.password=this.password;
           }
-          if(this.username==''||this.password==""){
+          if(this.userId==''||this.password==""){
             this.$message.error('账号和密码不能为空');
             return;
           }
           this.isLoading=true;
 
-          // this.$store.dispatch('login',{username:this.username,password:this.password,callback:()=>{
-          //   setCookie('username',this.username);
+          // this.$store.dispatch('login',{userId:this.userId,password:this.password,callback:()=>{
+          //   setCookie('userId',this.userId);
           //   this.$store.dispatch('connectSocket');
           //   this.$router.push({name:'home'})
           // }});
-          this.$http.post('/login.do',{username:this.username,password:this.password}).then(res=>{
+          this.$http.post('/login.do',{userId:this.userId,password:this.password}).then(res=>{
             this.isLoading=false;
             if(res.data.success){
-              sessionStorage.setItem('username',this.username);
+              sessionStorage.setItem('userId',this.userId);
               sessionStorage.setItem('password',this.password);
-              this.$store.state.userId=this.username;
-              this.$store.state.nickName=res.data.data.U_NickName||'';
-              setCookie('username',this.username);
+              this.$store.state.userId=this.userId;
+              this.$store.state.nickName=res.data.data.U_NickName;
+              setCookie('userId',this.userId);
               //this.$store.dispatch('connectSocket');
               this.$router.push({name:'home'})
             }
@@ -209,20 +213,20 @@
       isRegister(val){
         if(val){
           this.tip={
-            username:0,
+            userId:0,
             fPassword:0,
             sPassword:0,
             email:0
           };
           this.registerParams={
-            username:"",
+            userId:"",
             fPassword:"",
             sPassword:"",
             email:""
           }
         }else{
           if(getCookie('isRemember')==='true') return;
-          this.username='';
+          this.userId='';
           this.password='';
         }
       }
@@ -271,7 +275,7 @@
           text-align: center;
           margin-bottom: 20px;
         }
-        .tip{
+        .alerts{
           height: 30px;
           .el-alert{
             height: 30px;
@@ -281,6 +285,10 @@
           }
         }
       }
+    }
+    input:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0px 1000px white inset;
+      border: 1px solid #CCC!important;
     }
   }
 

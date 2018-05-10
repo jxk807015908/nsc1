@@ -1,19 +1,16 @@
 var express = require('express'),
     app = express(),
+    fs = require('fs'),
     server = require('http').createServer(app);
-let handleRequset=require('./handleRequset/handleRequset')
+// var privateKey = fs.readFileSync('./ssl/nscprivate.pem', 'utf8');
+// var certificate = fs.readFileSync('./ssl/nscfile.crt', 'utf8');
+// var credentials = {key: privateKey, cert: certificate};
+// let httpsServer = require('https').createServer(credentials, app);
+let handleRequset=require('./handleRequset/handleRequset');
 let socket=require('./socket/socket');
-const mysql=require('mysql');
-const connection=mysql.createConnection({
-  host:'localhost',
-  port:'3306',
-  user:'root',
-  password:'gw19950912',
-  database:'nsc',
-});
-connection.connect();
-app.use('/', express.static(__dirname));
+// httpsServer.listen(4001);
 server.listen(4000);
-socket.socket(server,connection);
-handleRequset.handle(app,connection);
+app.use('/', express.static(__dirname));
+socket.socket(server);
+handleRequset.handle(app);
 

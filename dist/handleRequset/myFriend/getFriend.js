@@ -1,5 +1,16 @@
-exports.getFriend = (app, connection) => {
+const searchFriend=require("../../businessLayer/myFriend/searchFriend");
+exports.getFriend = (app) => {
     app.post('/getFriend.do', (req, res) => {
+        let isSend=false;
+        res.setTimeout(3000,()=>{
+          isSend=true;
+          res.send({
+            code:10000,
+            data:null,
+            msg:'连接超时',
+            success:false
+          });
+        });
         let data = '';
         req.on('data', (chunk) => {
             data += chunk;
@@ -7,24 +18,22 @@ exports.getFriend = (app, connection) => {
         req.on('end', () => {
             data = decodeURI(data);
             let dataObject = JSON.parse(data);
-            let sql = `SELECT friends.F_FriendID,friends.F_Name,user.U_NickName,friends.F_FriendGroupsID FROM friends,user WHERE friends.F_FriendID=user.U_LoginID AND friends.F_UserID="${dataObject.username}"`;
-            connection.query(sql, (error, result) => {
-                if (error) {
-                    console.log(error.message);
-                    res.send({
-                        code: 10000,
-                        data: null,
-                        msg: '查询用户表和好友表发生错误',
-                        success: false
-                    })
-                } else {
-                    res.send({
-                      code: 10000,
-                      data: result,
-                      msg: '',
-                      success: true
-                    })
-                }
+            searchFriend.searchFriend({userId:dataObject.userId},(result)=>{
+              if (result==='error') {
+                (!isSend)&&res.send({
+                  code: 10000,
+                  data: null,
+                  msg: '查询用户表和好友表发生错误',
+                  success: false
+                })
+              } else {
+                (!isSend)&&res.send({
+                  code: 10000,
+                  data: result,
+                  msg: '',
+                  success: true
+                })
+              }
             });
         })
     });
