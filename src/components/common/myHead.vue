@@ -10,7 +10,11 @@
       text-color="#fff"
       active-text-color="#ffd04b">
       <el-menu-item index="1">主页</el-menu-item>
-      <el-menu-item index="2">我的消息</el-menu-item>
+      <el-menu-item index="2">
+        <el-badge :value="newTips.remindTips" class="item">
+          <span>我的消息</span>
+        </el-badge>
+      </el-menu-item>
       <el-submenu index="3">
         <template slot="title">联系人</template>
         <el-menu-item index="3-1">我的好友</el-menu-item>
@@ -50,7 +54,10 @@
         },{
           label:'退出账号',
           value:4
-        }]
+        }],
+        newTips:{
+          remindTips:0
+        }
       };
     },
     // computed:{
@@ -64,6 +71,13 @@
       }
     },
     methods: {
+      getNewTips(){
+        this.$http.post('/getNewTips.do',{userId:sessionStorage.getItem('userId')}).then(res=>{
+          if(res.data.success){
+            this.newTips.remindTips=res.data.data.remindTips;
+          }
+        })
+      },
       mainOperate(value){
         if(value===1){
           this.$router.push({name:'personal'})
@@ -88,6 +102,7 @@
       }
     },
     mounted(){
+      this.getNewTips();
       // this.$store.state.userId!==null&&(this.$refs.headPortrait.src=`http://localhost:8081/headProtrait/${this.$store.state.userId}.jpg?time=${new Date().getTime()}`);
       // this.$refs.headPortrait.src=`http://localhost:8081/headProtrait/${this.$store.state.userId}.jpg?time=${new Date().getTime()}`;
       //alert(this.$store.state.userId)
@@ -146,6 +161,17 @@
 </script>
 <style lang="less">
   .my-head{
+    .el-badge{
+      line-height: 60px;
+      display:block;
+      span{
+        line-height: 60px;
+        display: block;
+      }
+      .el-badge__content{
+        top:20px;
+      }
+    }
     .user{
       height: 61px;
       overflow: hidden;

@@ -135,6 +135,7 @@
                 groupId:this.groupId,
                 groupName:this.groupName,
                 userId:this.$store.state.userId,
+                nickName:this.$store.state.nickName,
                 icon:res.data,
               }).then(res=>{
                 if(res.data.success){

@@ -59,6 +59,7 @@ const searchGroupsFuzzily=require('./myGroups/searchGroupsFuzzily');
 const requestJoinGroup=require('./myGroups/requestJoinGroup');
 const getYourGroupRequest=require('./myGroups/getYourGroupRequest');
 const joinGroup2=require('./myGroups/joinGroup2');
+const getNewTips=require('./myHead/getNewTips');
 exports.handle=(app)=>{
   // const mysql=require('mysql');
   // const connection=mysql.createConnection({
@@ -116,5 +117,6 @@ exports.handle=(app)=>{
   requestJoinGroup.requestJoinGroup(app);
   getYourGroupRequest.getYourGroupRequest(app);
   joinGroup2.joinGroup2(app);
+  getNewTips.getNewTips(app);
 }
 

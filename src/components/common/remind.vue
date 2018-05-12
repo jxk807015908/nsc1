@@ -1,5 +1,6 @@
 <template>
   <div :class="{remind:true,checked:isChecked}" @click="messageCheck">
+    <span v-if="data.isRead==='0'" class="new">new</span>
     <i class="el-icon-close" @click.stop="deleteRemind"></i>
     <div v-if="data.messageType==='1'">
       <img src="../../assets/imgages/userBaseHeadImg.png" alt="">
@@ -60,6 +61,14 @@
   .remind{
     padding: 10px;
     position: relative;
+    .new{
+      position: absolute;
+      color: lawngreen;
+      font-size: 12px;
+      transform: rotate(-30deg);
+      left: 0;
+      top:0;
+    }
     p{
       font-size: 12px;
       color: yellow;

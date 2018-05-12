@@ -3,6 +3,7 @@
     <createGroupDialog :dialogFlag.sync="createGroupFlag"></createGroupDialog>
     <groupDetailDialog :dialogFlag.sync="groupDetailFlag" :openData="groupDetailData" :groupsList="groupsList"></groupDetailDialog>
     <searchGroupsDialog :dialogFlag.sync="searchGroupsFlag" :groupsList="groupsList"></searchGroupsDialog>
+    <friendDetailDialog :dialogFlag.sync="friendDetailFlag" :openData="friendDetailData"></friendDetailDialog>
     <el-container>
       <el-aside width="200px">
         <div class="operate">
@@ -10,7 +11,7 @@
         </div>
         <div class="search-wrap">
           <el-input placeholder="请输入群ID或群名进行搜索" v-model="searchParams" @focus="isFilterGroupShow=true" @blur="isFilterGroupShow=false"></el-input>
-          <ul v-if="isFilterGroupShow">
+          <ul :class="{groupWrapHide:!isFilterGroupShow}">
             <li v-for="group in filterGroup" @click="goToGroup(group)">
               <headPortrait :isSave="true" :class="`group${group.groupId}`" :imgUrl="group.groupIcon" @imgClick="imgClick" :indexPath="[group.groupAdminId === $store.state.userId?'0':'1',group.groupId]"></headPortrait>
               <span>{{group.groupName}}</span>
@@ -51,14 +52,14 @@
                 <div>
                   <headPortrait :class="`group${group.groupId}`" :imgUrl="group.groupIcon" @imgClick="imgClick" :indexPath="['0',group.groupId]"></headPortrait>
                   <span :class="{isActive:group.groupId === curGroupId}">{{group.groupName}}</span>
-                  <div class="cascader" @click.stop="">
-                    <el-cascader
-                      :ref="'group'+index"
-                      :options="options"
-                      v-model="selectedOptions"
-                      @change="handleChange('0',index)">
-                    </el-cascader>
-                  </div>
+                  <!--<div class="cascader" @click.stop="">-->
+                    <!--<el-cascader-->
+                      <!--:ref="'group'+index"-->
+                      <!--:options="options"-->
+                      <!--v-model="selectedOptions"-->
+                      <!--@change="handleChange('0',index)">-->
+                    <!--</el-cascader>-->
+                  <!--</div>-->
                 </div>
               </el-menu-item>
             </el-submenu>
@@ -68,14 +69,14 @@
                 <div>
                   <headPortrait :class="`group${group.groupId}`" :imgUrl="group.groupIcon" @imgClick="imgClick" :indexPath="['1',group.groupId]"></headPortrait>
                   <span :class="{isActive:group.groupId === curGroupId}">{{group.groupName}}</span>
-                  <div class="cascader" @click.stop="">
-                    <el-cascader
-                      :ref="'group'+index"
-                      :options="options"
-                      v-model="selectedOptions"
-                      @change="handleChange('1',index)">
-                    </el-cascader>
-                  </div>
+                  <!--<div class="cascader" @click.stop="">-->
+                    <!--<el-cascader-->
+                      <!--:ref="'group'+index"-->
+                      <!--:options="options"-->
+                      <!--v-model="selectedOptions"-->
+                      <!--@change="handleChange('1',index)">-->
+                    <!--</el-cascader>-->
+                  <!--</div>-->
                 </div>
               </el-menu-item>
             </el-submenu>
@@ -87,7 +88,7 @@
           <div class="loading-wrap" v-show="isMessageLoading"><i class="el-icon-loading"></i></div>
           <div v-if="curGroupId!==''" class="messageField">
             <p v-if="total !==0 && total <= messageRecord.length">没有记录了</p>
-            <aMessage v-for="(item,index) in messageRecord" :key="index" :name="item.name" :isAtRight="item.isAtRight"
+            <aMessage @imgClick="openFriendDetail" v-for="(item,index) in messageRecord" :key="index" :name="item.name" :isAtRight="item.isAtRight"
                       :expressArr="expressArr" :data="item"></aMessage>
           </div>
         </el-main>
@@ -143,6 +144,7 @@
   import createGroupDialog from './myGroupsMoudle/createGroupDialog'
   import groupDetailDialog from './myGroupsMoudle/groupDetailDialog'
   import searchGroupsDialog from './myGroupsMoudle/searchGroupsDialog'
+  import friendDetailDialog from './myFriendMoudle/friendDetailDialog'
   import {toBottom, translateExpress, getExpressName, getBase64Image, onToTop} from '@/util/common'
 
   export default {
@@ -182,7 +184,9 @@
         createGroupFlag: false,
         groupDetailFlag: false,
         groupDetailData:{},
-        curGroupDetailData:{}
+        curGroupDetailData:{},
+        friendDetailFlag:false,
+        friendDetailData:{}
       };
     },
     computed: {
@@ -224,6 +228,23 @@
       this.getExpress(false);
     },
     methods: {
+      openFriendDetail(userId){
+        this.$http.post('/getUserInfo.do',{userId:userId}).then(res=>{
+          if(res.data.success){
+            this.friendDetailData={
+              userId:res.data.data[0].U_LoginID,
+              nickName:res.data.data[0].U_NickName,
+              age:res.data.data[0].U_Age,
+              birthday:res.data.data[0].U_Birthday,
+              phone:res.data.data[0].U_Telephone,
+              email:res.data.data[0].U_Email,
+              name:res.data.data[0].U_Name,
+              sex:res.data.data[0].U_Sex
+            };
+            this.friendDetailFlag=true;
+          }
+        })
+      },
       goToGroup(group){
         this.$refs.groupMenu.open(group.groupAdminId === this.$store.state.userId?'0':'1');
         this.select(group.groupId,[group.groupAdminId === this.$store.state.userId?'0':'1',group.groupId]);
@@ -682,7 +703,8 @@
       headPortrait,
       createGroupDialog,
       groupDetailDialog,
-      searchGroupsDialog
+      searchGroupsDialog,
+      friendDetailDialog
     }
   }
 </script>

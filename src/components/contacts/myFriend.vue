@@ -2,6 +2,7 @@
   <div class="myFriend" @mousedown="openGroupMenu">
     <groupManageDialog :dialogFlag.sync="groupFlag" :openData="friendGroup"></groupManageDialog>
     <addFriendDialog :dialogFlag.sync="addFlag" :friendList="friendList"></addFriendDialog>
+    <friendDetailDialog :dialogFlag.sync="friendDetailFlag" :openData="friendDetailData"></friendDetailDialog>
     <el-container>
       <el-aside width="200px">
         <div class="operate">
@@ -10,9 +11,9 @@
         </div>
         <div class="search-wrap">
           <el-input placeholder="请输入好友账号或昵称进行搜索" v-model="searchParams" @focus="isFilterFriendShow=true" @blur="isFilterFriendShow=false"></el-input>
-          <ul class="filter-friend-wrap" :class="{hasFriend:filterFriend.length!==0}" v-if="isFilterFriendShow">
+          <ul class="filter-friend-wrap" :class="{hasFriend:filterFriend.length!==0,friendWrapHide:!isFilterFriendShow}">
             <li v-for="friend in filterFriend" @click="goTofriend(friend)">
-              <headPortrait :isSave="true" :status="friend.status" :userId="friend.friendId" :hasDetail="true" :data="friend"></headPortrait>
+              <headPortrait @imgClick="imgClick" :indexPath="friend.friendId" :isSave="true" :status="friend.status" :userId="friend.friendId" :hasDetail="true" :data="friend"></headPortrait>
               <span :class="{lowColor:friend.status === 0,isActive:friend.friendId === curFriendId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
             </li>
           </ul>
@@ -40,7 +41,7 @@
                   <!--<img src="../../assets/imgages/userBaseHeadImg.png" alt="">-->
                   <!--</el-tooltip>-->
                   <!--<img src="../../assets/imgages/userBaseHeadImg.png" alt="">-->
-                  <headPortrait :status="friend.status" :userId="friend.friendId" :hasDetail="true" :data="friend"></headPortrait>
+                  <headPortrait @imgClick="imgClick" :indexPath="friend.friendId" :status="friend.status" :userId="friend.friendId" :hasDetail="true" :data="friend"></headPortrait>
                   <span :class="{lowColor:friend.status === 0,isActive:friend.friendId === curFriendId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
                   <div class="cascader" @click.stop="">
                     <el-cascader
@@ -61,7 +62,7 @@
           <div class="loading-wrap" v-show="isMessageLoading"><i class="el-icon-loading"></i></div>
           <div v-if="this.curFriendId!==''" class="messageField">
             <p v-if="total !==0 && total <= messageRecord.length">没有记录了</p>
-            <aMessage :key="index" v-for="(item,index) in messageRecord" :name="item.name" :isAtRight="item.isAtRight"
+            <aMessage @imgClick="imgClick" :key="index" v-for="(item,index) in messageRecord" :name="item.name" :isAtRight="item.isAtRight"
                       :expressArr="expressArr" :data="item"></aMessage>
           </div>
         </el-main>
@@ -117,6 +118,7 @@
   import aMessage from '../common/aMessage'
   import groupManageDialog from './myFriendMoudle/groupManageDialog'
   import addFriendDialog from './myFriendMoudle/addFriendDialog'
+  import friendDetailDialog from './myFriendMoudle/friendDetailDialog'
   import headPortrait from './../common/headPortrait'
   import {toBottom, translateExpress, getExpressName, getBase64Image, onToTop} from '@/util/common'
 
@@ -124,6 +126,7 @@
     name: 'myFriend',
     data: function () {
       return {
+        friendDetailFlag:false,
         isFilterFriendShow:false,
         searchParams: '',
         isMessageLoading: false,
@@ -152,7 +155,8 @@
         messageRecord: [],
         expressArr: [],
         openTime: '',
-        isLoadingImage: true
+        isLoadingImage: true,
+        friendDetailData:{}
       };
     },
     computed: {
@@ -191,6 +195,23 @@
     //   }
     // },
     methods: {
+      imgClick(userId){
+        this.$http.post('/getUserInfo.do',{userId:userId}).then(res=>{
+          if(res.data.success){
+            this.friendDetailData={
+              userId:res.data.data[0].U_LoginID,
+              nickName:res.data.data[0].U_NickName,
+              age:res.data.data[0].U_Age,
+              birthday:res.data.data[0].U_Birthday,
+              phone:res.data.data[0].U_Telephone,
+              email:res.data.data[0].U_Email,
+              name:res.data.data[0].U_Name,
+              sex:res.data.data[0].U_Sex
+            };
+            this.friendDetailFlag=true;
+          }
+        })
+      },
       goTofriend(friend){
         // console.log(friend)
         this.$refs.friendMenu.open(friend.friendGroupsId);
@@ -776,7 +797,8 @@
       aMessage,
       groupManageDialog,
       addFriendDialog,
-      headPortrait
+      headPortrait,
+      friendDetailDialog
     }
   }
 </script>
@@ -841,6 +863,11 @@
             transition: all 0.9s;
             /*height: 100px;*/
             opacity: 1;
+          }
+          .friendWrapHide{
+            transition: all 0.9s;
+            /*height: 100px;*/
+            opacity: 0;
           }
         }
         //height: calc(~'100% - 61px');

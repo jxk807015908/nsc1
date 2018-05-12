@@ -67,7 +67,7 @@
                   <template slot="title"><span>{{item.name}}</span></template>
                   <el-menu-item v-for="(friend,index2) in item.content" :key="index2" :index="friend.friendId">
                     <div>
-                      <headPortrait :isSave="true" :userId="friend.friendId"></headPortrait>
+                      <headPortrait @imgClick="imgClick" :indexPath="friend.friendId" :isSave="true" :userId="friend.friendId"></headPortrait>
                       {{friend.remark||friend.nickName||friend.friendId}}
                     </div>
                   </el-menu-item>
@@ -87,7 +87,7 @@
             <ul>
               <li v-for="obj in openData.members" :key="obj.memberId">
                 <el-row>
-                  <el-col :span="8"><headPortrait :userId="obj.memberId"></headPortrait></el-col>
+                  <el-col :span="8"><headPortrait @imgClick="imgClick" :indexPath="obj.memberId" :userId="obj.memberId"></headPortrait></el-col>
                   <el-col :span="8">{{obj.groupNick||obj.memberId}}</el-col>
                   <el-col :span="8"><span>{{obj.authority===1?'群主':obj.authority===3?'群员':''}}</span></el-col>
                 </el-row>
@@ -118,9 +118,9 @@
           <el-button v-if="openData.members&&openData.members.some(obj =>obj.memberId === $store.state.userId)" type="primary" @click="saveGroupDetail">保存</el-button>
           <el-button v-if="openData.members&&openData.members.some(obj =>obj.memberId === $store.state.userId)" type="primary" @click="quitGroup">退出本群</el-button>
           <el-button v-if="$store.state.userId===openData.adminId" type="primary" @click="dismissGroup">解散本群</el-button>
-          <el-button v-if="openData.members&&!openData.members.some(obj =>obj.memberId === $store.state.userId)" type="primary" @click="" :disabled="groupsList.requestGroup.some(item=>item.groupId==openData.groupId)||groupsList.joinGroup.some(item=>item.groupId==openData.groupId)||groupsList.createGroup.some(item=>item.groupId==openData.groupId)" @click="requestJoinGroup">
-            {{groupsList.requestGroup.some(item=>item.groupId==openData.groupId)?'已申请':'申请加入'}}
-          </el-button>
+          <!--<el-button v-if="openData.members&&!openData.members.some(obj =>obj.memberId === $store.state.userId)" type="primary" @click="" :disabled="groupsList.requestGroup.some(item=>item.groupId==openData.groupId)||groupsList.joinGroup.some(item=>item.groupId==openData.groupId)||groupsList.createGroup.some(item=>item.groupId==openData.groupId)" @click="requestJoinGroup">-->
+            <!--{{groupsList.requestGroup.some(item=>item.groupId==openData.groupId)?'已申请':'申请加入'}}-->
+          <!--</el-button>-->
         </div>
       </div>
     </dialogs>
@@ -152,6 +152,9 @@
         this.params.groupIntro=this.openData.groupIntro;
         this.params.groupName=this.openData.groupName;
         this.params.groupNick=(this.openData.members.filter(obj=>obj.memberId===this.$store.state.userId)[0]&&this.openData.members.filter(obj=>obj.memberId===this.$store.state.userId)[0].groupNick)||this.$store.state.nickName||this.$store.state.userId;
+      },
+      imgClick(indexPath){
+        this.$parent.openFriendDetail(indexPath);
       },
       requestJoinGroup() {
         let group = JSON.parse(JSON.stringify(this.openData));
