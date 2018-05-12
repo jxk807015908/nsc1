@@ -162,6 +162,13 @@
       },
       messageCheck(index) {
         this.checkedIndex = index;
+        if(this.remindList[index].isRead==='0'){
+          this.$store.state.socket.emit('readRemind',{
+            id:this.remindList[index].id,
+            userId:this.$store.state.userId
+          });
+          this.remindList[index].isRead=1;
+        }
       },
       deleteRemind(index) {
         this.$http.post('/deleteRemind.do', {id: this.remindList[index].id}).then(res => {

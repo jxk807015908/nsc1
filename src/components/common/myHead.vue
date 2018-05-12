@@ -11,8 +11,9 @@
       active-text-color="#ffd04b">
       <el-menu-item index="1">主页</el-menu-item>
       <el-menu-item index="2">
-        <el-badge :value="newTips.remindTips" class="item">
-          <span>我的消息</span>
+        <span>我的消息</span>
+        <el-badge :value="newTips.remindTips" class="item" v-if="newTips.remindTips!==0">
+          <span>1</span>
         </el-badge>
       </el-menu-item>
       <el-submenu index="3">
@@ -143,6 +144,12 @@
                 };
               }
             });
+            this.$store.state.socket.removeAllListeners('tipsNumChange');
+            this.$store.state.socket.on('tipsNumChange',(item)=>{
+              if(item.type===1){
+                this.newTips.remindTips+=item.num;
+              }
+            })
           }
         },
         deep: true
@@ -162,11 +169,15 @@
 <style lang="less">
   .my-head{
     .el-badge{
-      line-height: 60px;
-      display:block;
+      position: absolute;
+      /*line-height: 60px;*/
+      /*display:block;*/
+      /*span{*/
+        /*line-height: 60px;*/
+        /*display: block;*/
+      /*}*/
       span{
-        line-height: 60px;
-        display: block;
+        color:transparent;
       }
       .el-badge__content{
         top:20px;

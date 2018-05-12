@@ -2,6 +2,7 @@ let socketIo=require('socket.io');
 const changeUserStatus = require('./../businessLayer/user/changeUserStatus');
 const searchUser2 = require('./../businessLayer/user/searchUser2');
 const searchUser = require('./../businessLayer/user/searchUser');
+const updateUserMessages = require('./../businessLayer/usermessages/updateUserMessages');
 exports.socket=(server)=>{
   let io=socketIo.listen(server);
   let users = [];
@@ -206,10 +207,24 @@ exports.socket=(server)=>{
         }
       }
     });
-    //new image get
-    socket.on('img', function(imgData, color) {
+    //
+    socket.on('readRemind', function(obj) {
       //console.log('---------------------')
       //socket.broadcast.emit('newImg', socket.nickname, imgData, color);
+      console.log('正在读提醒')
+      updateUserMessages.updateUserMessages({
+        id:obj.id,
+        isRead:1
+      },(result)=>{
+        if (result==='error') {
+
+        } else {
+          let toUser=users.filter(item=>item.userId==obj.userId);
+          if(toUser.length===1){
+            io.sockets.to(toUser[0].socketId).emit('tipsNumChange',{type:1,num:-1});
+          }
+        }
+      });
     });
 
 
