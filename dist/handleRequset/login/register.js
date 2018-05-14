@@ -12,7 +12,12 @@ exports.register = (app, connection) => {
           success:false
         });
       });
-      insertNewUser.insertNewUser({userId:req.query.userId,password:req.query.password,email:req.query.email},(result)=>{
+      insertNewUser.insertNewUser({
+        userId:req.query.userId,
+        // nickName:req.query.userId,
+        password:req.query.password,
+        email:req.query.email
+      },(result)=>{
         if (result==='error') {
           (!isSend)&&res.send({
             code: 10000,

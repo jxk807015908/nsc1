@@ -3,7 +3,9 @@
     <span v-if="data.isRead==='0'" class="new">new</span>
     <i class="el-icon-close" @click.stop="deleteRemind"></i>
     <div v-if="data.messageType==='1'">
-      <img src="../../assets/imgages/userBaseHeadImg.png" alt="">
+      <headPortrait v-if="data.remark==='group'&&groupIcon" :imgUrl="groupIcon" @imgClick="imgClick"
+                    :indexPath="data.fromId"></headPortrait>
+      <headPortrait v-if="data.remark==='friend'" @imgClick="imgClick" :indexPath="data.fromId" :userId="data.fromId"></headPortrait>
       <span>{{data.fromName||data.fromId}}</span>
     </div>
     <div v-if="data.messageType==='2'">
@@ -41,11 +43,23 @@
   </div>
 </template>
 <script>
+  import headPortrait from './headPortrait'
     export default {
         name:'remind',
         props:['data','index','isChecked'],
         data: function () {
-            return {};
+            return {
+              groupIcon:null
+            };
+        },
+        mounted(){
+          if(this.data.messageType==='1'&&this.data.remark==='group'){
+            this.$http.post('/getGroupDetailData.do', {groupId: this.data.fromId}).then(res=>{
+              if(res.data.success){
+                this.groupIcon=res.data.data[0].UG_Icon;
+              }
+            })
+          }
         },
         methods:{
           messageCheck(){
@@ -54,6 +68,9 @@
           deleteRemind(){
             this.$emit('deleteRemind',this.index)
           }
+        },
+        components:{
+          headPortrait
         }
     }
 </script>
@@ -85,6 +102,10 @@
     }
     .el-icon-close:hover{
       color: black;
+    }
+    .headPortrait{
+      width: 40px;
+      height: 40px;
     }
   }
   .remind:not(.checked):hover{

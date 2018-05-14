@@ -69,6 +69,7 @@
     props: ['chatType', 'chatId', 'detailData'],
     data: function () {
       return {
+        detailData:null,
         friendDetailFlag: false,
         isMessageLoading: false,
         pageNo: 1,
@@ -107,6 +108,12 @@
       this.init();
     },
     methods: {
+      getDetailData(){
+        let path;
+        if(this.chatType===1){
+          path='/get'
+        }
+      },
       //用户头像点击，获得用户信息
       imgClick(userId) {
         this.$http.post('/getUserInfo.do', {userId: userId}).then(res => {
@@ -268,7 +275,7 @@
           this.isLoadingImage = true;
           this.$http.post('/getExpress.do', {userId: this.$store.state.userId}).then(res => {
             if (res.data.success) {
-              this.expressArr = res.data.data;
+              this.expressArr = this.$store.state.expressArr = res.data.data;
               this.isLoadingImage = false;
             }
           })
@@ -283,7 +290,8 @@
               messageType: 1,
               message: this.message,
               from: sessionStorage.getItem('userId'),
-              to: this.chatId
+              to: this.chatId,
+              userName:this.$store.state.nickName
             };
           } else {
             uName = this.detailData.members.filter(obj => obj.memberId === this.$store.state.userId)[0].groupNick;
@@ -291,6 +299,7 @@
               messageType: 1,
               message: this.message,
               from: this.$store.state.userId,
+              fromName:this.detailData.groupName,
               groupId: this.chatId,
               uName: uName || this.$store.state.nickName || this.$store.state.userId
             };

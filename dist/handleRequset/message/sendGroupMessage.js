@@ -1,4 +1,8 @@
 const insertGroupsMessage = require("../../businessLayer/groupsMessage/insertGroupsMessage");
+const insertUserMessages = require("../../businessLayer/usermessages/insertUserMessages");
+const selectUserMessages = require("../../businessLayer/usermessages/selectUserMessages");
+const updateUserMessages = require("../../businessLayer/usermessages/updateUserMessages");
+const selectUserGroupsToUser2 = require("../../businessLayer/usergroupstouser/selectUserGroupsToUser2");
 exports.sendGroupMessage = (app) => {
   app.post('/sendGroupMessage.do', (req, res) => {
     let isSend = false;
@@ -18,32 +22,137 @@ exports.sendGroupMessage = (app) => {
     req.on('end', () => {
       data = decodeURI(data);
       let dataObject = JSON.parse(data);
-      insertGroupsMessage.insertGroupsMessage({
+      function opera() {
+        return new Promise((resolve, reject) => {
+          selectUserGroupsToUser2Fn({groupId:dataObject.groupId}).then((result2)=>{
+            let length=result2.length;
+            let num=0;
+            result2.forEach(obj=>{
+              if(obj.UGU_UserID!==dataObject.from){
+                selectUserMessagesFn({
+                  fromId:dataObject.groupId,
+                  toId: obj.UGU_UserID,
+                  messageType: 1,
+                  remark: 'group',
+                }).then((result) => {
+                  if (result.length === 0) {
+                    insertUserMessagesFn({
+                      messageType: 1,
+                      time: `${new Date().getTime()}`,
+                      fromId:dataObject.groupId,
+                      toId: obj.UGU_UserID,
+                      fromName: dataObject.fromName,
+                      remark: 'group',
+                      tipNum: 1,
+                    }).then(() => {
+                      num++;
+                      num===length&&resolve();
+                    })
+                  } else {
+                    updateUserMessagesFn({
+                      id: result[0].UM_ID,
+                      tipNum: result[0].UM_TipNum + 1
+                    }).then(() => {
+                      num++;
+                      num===length&&resolve();
+                    })
+                  }
+                }).catch(() => {
+                  reject();
+                })
+              }else{
+                num++;
+                num===length&&resolve();
+              }
+            })
+          });
+        })
+      }
+
+      Promise.all([insertGroupsMessageFn({
         messageType: dataObject.messageType,
         message: dataObject.message,
         status: 0,
         time: `${new Date().getTime()}`,
         fromId: dataObject.from,
         uName: dataObject.uName,
-        groupId:dataObject.groupId,
+        groupId: dataObject.groupId,
         expressName: dataObject.expressName
-      }, (result) => {
-        if (result === 'error') {
-          (!isSend) && res.send({
-            code: 10000,
-            data: null,
-            msg: '发生错误',
-            success: false
-          })
-        } else {
-          (!isSend) && res.send({
-            code: 10000,
-            data: null,
-            msg: '',
-            success: true
-          })
-        }
+      }), opera()]).then(() => {
+        (!isSend) && res.send({
+          code: 10000,
+          data: null,
+          msg: '',
+          success: true
+        })
+      }).catch(() => {
+        (!isSend) && res.send({
+          code: 10000,
+          data: null,
+          msg: '发生错误',
+          success: false
+        })
       })
     })
   });
 };
+
+function insertGroupsMessageFn(obj) {
+  return new Promise((resolve, reject) => {
+    insertGroupsMessage.insertGroupsMessage(obj, (result) => {
+      if (result === 'error') {
+        reject();
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+function insertUserMessagesFn(obj) {
+  return new Promise((resolve, reject) => {
+    insertUserMessages.insertUserMessages(obj, (result) => {
+      if (result === 'error') {
+        reject();
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+function selectUserMessagesFn(obj) {
+  return new Promise((resolve, reject) => {
+    selectUserMessages.selectUserMessages(obj, (result) => {
+      if (result === 'error') {
+        reject();
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+function updateUserMessagesFn(obj) {
+  return new Promise((resolve, reject) => {
+    updateUserMessages.updateUserMessages(obj, (result) => {
+      if (result === 'error') {
+        reject();
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+function selectUserGroupsToUser2Fn(obj) {
+  return new Promise((resolve, reject) => {
+    selectUserGroupsToUser2.selectUserGroupsToUser2(obj, (result) => {
+      if (result === 'error') {
+        reject();
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}

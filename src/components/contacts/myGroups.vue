@@ -17,7 +17,7 @@
             <li v-for="group in filterGroup" @click="goToGroup(group)">
               <headPortrait :isSave="true" :class="`group${group.groupId}`" :imgUrl="group.groupIcon"
                             @imgClick="imgClick"
-                            :indexPath="[group.groupAdminId === $store.state.userId?'0':'1',group.groupId]"></headPortrait>
+                            :indexPath="group.groupId"></headPortrait>
               <span>{{group.groupName}}</span>
             </li>
           </ul>
@@ -55,7 +55,7 @@
               <el-menu-item v-for="(group,index) in groupsList.createGroup" :key="index" :index="group.groupId">
                 <div>
                   <headPortrait :class="`group${group.groupId}`" :imgUrl="group.groupIcon" @imgClick="imgClick"
-                                :indexPath="['0',group.groupId]"></headPortrait>
+                                :indexPath="group.groupId"></headPortrait>
                   <span :class="{isActive:group.groupId === curGroupId}">{{group.groupName}}</span>
                   <!--<div class="cascader" @click.stop="">-->
                   <!--<el-cascader-->
@@ -73,7 +73,7 @@
               <el-menu-item v-for="(group,index) in groupsList.joinGroup" :key="index" :index="group.groupId">
                 <div>
                   <headPortrait :class="`group${group.groupId}`" :imgUrl="group.groupIcon" @imgClick="imgClick"
-                                :indexPath="['1',group.groupId]"></headPortrait>
+                                :indexPath="group.groupId"></headPortrait>
                   <span :class="{isActive:group.groupId === curGroupId}">{{group.groupName}}</span>
                   <!--<div class="cascader" @click.stop="">-->
                   <!--<el-cascader-->
@@ -269,7 +269,7 @@
         // let group=indexPath[0]==='0'?this.groupsList.createGroup.filter(obj=>obj.groupId===indexPath[1])[0]:this.groupsList.joinGroup.filter(obj=>obj.groupId===indexPath[1])[0];
         // let group=indexPath[0]==='0'?this.groupsList.createGroup[indexPath[1]]:this.groupsList.joinGroup[indexPath[1]];
         // Promise.all([this.getGroupDetailData(group.groupId),this.getGroupMembers(group.groupId)]).then(result=>{
-        Promise.all([this.getGroupDetailData(indexPath[1]), this.getGroupMembers(indexPath[1])]).then(result => {
+        Promise.all([this.getGroupDetailData(indexPath), this.getGroupMembers(indexPath)]).then(result => {
           // console.log(result);
           if (result[0].data.success && result[1].data.success) {
             this.groupDetailData = {

@@ -192,6 +192,7 @@
       /*display: block;*/
       /*}*/
       span {
+        position: absolute;
         color: transparent;
       }
       .el-badge__content {

@@ -11,6 +11,9 @@
       </el-aside>
       <el-container>
         <div class="detail" v-if="checkedIndex!==''">
+          <div v-if="remindList[checkedIndex].messageType==='1'" class="proving">
+            <chatWindow :chatId="remindList[checkedIndex].fromId" :chatType="remindList[checkedIndex].remark==='friend'?1:2" :detailData="detailData"></chatWindow>
+          </div>
           <div v-if="remindList[checkedIndex].messageType==='2'" class="proving">
             <p><span @click="getUserInfo(remindList[checkedIndex].fromId)">{{remindList[checkedIndex].fromName||remindList[checkedIndex].fromId}}</span>向您发来好友验证:</p>
             <p class="question">您的问题:{{remindList[checkedIndex].remark}}</p>
@@ -66,6 +69,7 @@
   import remind from '../common/remind'
   import groupDetailDialog from '../contacts/myGroupsMoudle/groupDetailDialog'
   import friendDetailDialog from '../contacts/myFriendMoudle/friendDetailDialog'
+  import chatWindow from './../common/chatWindow'
   import {timeFormat} from '../../util/common'
 
   export default {
@@ -77,13 +81,15 @@
         remindList: [],
         checkedIndex: '',
         groupDetailData:{},
-        friendDetailData:{}
+        friendDetailData:{},
+        detailData:{}
       };
     },
     components: {
       remind,
       groupDetailDialog,
-      friendDetailDialog
+      friendDetailDialog,
+      chatWindow
     },
     created() {
       this.getAllRemind();
@@ -161,14 +167,21 @@
         })
       },
       messageCheck(index) {
-        this.checkedIndex = index;
-        if(this.remindList[index].isRead==='0'){
-          this.$store.state.socket.emit('readRemind',{
-            id:this.remindList[index].id,
-            userId:this.$store.state.userId
-          });
-          this.remindList[index].isRead=1;
-          this.$store.state.remindTips +=-1;
+        if(this.checkedIndex === index) return;
+        if(this.remindList[index].messageType==='1'){
+          if(this.remindList[index].remark==='friend'){
+
+          }
+        }else{
+          this.checkedIndex = index;
+          if(this.remindList[index].isRead==='0'){
+            this.$store.state.socket.emit('readRemind',{
+              id:this.remindList[index].id,
+              userId:this.$store.state.userId
+            });
+            this.remindList[index].isRead=1;
+            this.$store.state.remindTips +=-1;
+          }
         }
       },
       deleteRemind(index) {
@@ -242,7 +255,8 @@
                   time: timeFormat(parseInt(obj.UM_Time), 'yyyy-MM-dd HH:mm'),
                   messageType: obj.UM_MessageType,
                   remark: ['6', '7', '8', '9'].includes(obj.UM_MessageType) ? JSON.parse(obj.UM_Remark) : obj.UM_Remark,
-                  id: obj.UM_ID
+                  id: obj.UM_ID,
+                  tipNum:obj.UM_TipNum
                 })
               });
               this.remindList = temp;
