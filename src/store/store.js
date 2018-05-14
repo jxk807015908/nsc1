@@ -14,7 +14,9 @@ export default new Vuex.Store({
     nickName:null,
     userId:null,
     socket:null,
-    pageSize:10
+    pageSize:10,
+    expressArr:[],
+    remindTips:0
   },
   mutations:{
 

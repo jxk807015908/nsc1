@@ -168,6 +168,7 @@
             userId:this.$store.state.userId
           });
           this.remindList[index].isRead=1;
+          this.$store.state.remindTips +=-1;
         }
       },
       deleteRemind(index) {

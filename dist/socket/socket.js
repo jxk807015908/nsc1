@@ -216,14 +216,14 @@ exports.socket=(server)=>{
         id:obj.id,
         isRead:1
       },(result)=>{
-        if (result==='error') {
-
-        } else {
-          let toUser=users.filter(item=>item.userId==obj.userId);
-          if(toUser.length===1){
-            io.sockets.to(toUser[0].socketId).emit('tipsNumChange',{type:1,num:-1});
-          }
-        }
+        // if (result==='error') {
+        //
+        // } else {
+        //   let toUser=users.filter(item=>item.userId==obj.userId);
+        //   if(toUser.length===1){
+        //     io.sockets.to(toUser[0].socketId).emit('tipsNumChange',{type:1,num:-1});
+        //   }
+        // }
       });
     });
 
