@@ -11,9 +11,9 @@
       </el-aside>
       <el-container>
         <div class="detail" v-if="checkedIndex!==''">
-          <div v-if="remindList[checkedIndex].messageType==='1'" class="proving">
-            <chatWindow :chatId="remindList[checkedIndex].fromId" :chatType="remindList[checkedIndex].remark==='friend'?1:2" :detailData="detailData"></chatWindow>
-          </div>
+          <!--<div v-if="remindList[checkedIndex].messageType==='1'">-->
+            <chatWindow v-if="remindList[checkedIndex].messageType==='1'" :chatId="remindList[checkedIndex].fromId" :chatType="remindList[checkedIndex].remark==='friend'?1:2" :detailData="detailData"></chatWindow>
+          <!--</div>-->
           <div v-if="remindList[checkedIndex].messageType==='2'" class="proving">
             <p><span @click="getUserInfo(remindList[checkedIndex].fromId)">{{remindList[checkedIndex].fromName||remindList[checkedIndex].fromId}}</span>向您发来好友验证:</p>
             <p class="question">您的问题:{{remindList[checkedIndex].remark}}</p>
@@ -166,22 +166,61 @@
           }
         })
       },
+      getGroupDetailData(groupId) {
+        return this.$http.post('/getGroupDetailData.do', {groupId: groupId})
+      },
+      getGroupMembers(groupId) {
+        return this.$http.post('/getGroupMembers.do', {groupId: groupId})
+      },
       messageCheck(index) {
         if(this.checkedIndex === index) return;
         if(this.remindList[index].messageType==='1'){
           if(this.remindList[index].remark==='friend'){
-
+            this.detailData={remark:this.remindList[index].fromName};
+            this.checkedIndex = index;
+          }else{
+            Promise.all([this.getGroupDetailData(this.remindList[index].fromId), this.getGroupMembers(this.remindList[index].fromId)]).then(result => {
+              // console.log(result);
+              if (result[0].data.success && result[1].data.success) {
+                this.detailData = {
+                  groupId: result[0].data.data[0].UG_ID,
+                  groupName: result[0].data.data[0].UG_Name,
+                  groupIntro: result[0].data.data[0].UG_Intro,
+                  groupNotice: result[0].data.data[0].UG_Notice,
+                  icon: result[0].data.data[0].UG_Icon,
+                  createTime: result[0].data.data[0].UG_CreateTime,
+                  adminId: result[0].data.data[0].UG_AdminID,
+                  members: []
+                };
+                result[1].data.data.forEach(obj => {
+                  this.detailData.members.push({
+                    groupNick: obj.UGU_GroupNick,
+                    memberId: obj.UGU_UserID,
+                    joinTime: obj.UGU_CreateTime,
+                    authority: obj.UGU_Authority
+                  })
+                });
+                this.checkedIndex = index;
+              }
+            })
           }
         }else{
           this.checkedIndex = index;
-          if(this.remindList[index].isRead==='0'){
-            this.$store.state.socket.emit('readRemind',{
-              id:this.remindList[index].id,
-              userId:this.$store.state.userId
-            });
-            this.remindList[index].isRead=1;
-            this.$store.state.remindTips +=-1;
-          }
+        }
+        if(this.remindList[index].isRead==='0'){
+          // this.$store.state.socket.emit('readRemind',{
+          //   id:this.remindList[index].id,
+          //   userId:this.$store.state.userId
+          // });
+          this.$http.post('/readRemind.do',{
+            id:this.remindList[index].id,
+            userId:this.$store.state.userId,
+            type:this.remindList[index].messageType==='1'?'1':'2'
+          }).then(res=>{
+
+          })
+          this.remindList[index].isRead=1;
+          this.$store.state.remindTips =this.$store.state.remindTips-this.remindList[index].tipNum;
         }
       },
       deleteRemind(index) {

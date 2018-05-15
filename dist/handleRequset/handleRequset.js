@@ -60,6 +60,7 @@ const requestJoinGroup=require('./myGroups/requestJoinGroup');
 const getYourGroupRequest=require('./myGroups/getYourGroupRequest');
 const joinGroup2=require('./myGroups/joinGroup2');
 const getNewTips=require('./myHead/getNewTips');
+const readRemind=require('./myMessages/readRemind');
 exports.handle=(app)=>{
   // const mysql=require('mysql');
   // const connection=mysql.createConnection({
@@ -118,5 +119,6 @@ exports.handle=(app)=>{
   getYourGroupRequest.getYourGroupRequest(app);
   joinGroup2.joinGroup2(app);
   getNewTips.getNewTips(app);
+  readRemind.readRemind(app);
 }
 

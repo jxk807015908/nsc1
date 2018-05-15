@@ -69,7 +69,7 @@
     props: ['chatType', 'chatId', 'detailData'],
     data: function () {
       return {
-        detailData:null,
+        // detailData:null,
         friendDetailFlag: false,
         isMessageLoading: false,
         pageNo: 1,
@@ -634,6 +634,7 @@
 <style lang="less">
   .chatWindow {
     width: 100%;
+    height: 100%;
     .el-container {
       height: 100%;
       .small {
