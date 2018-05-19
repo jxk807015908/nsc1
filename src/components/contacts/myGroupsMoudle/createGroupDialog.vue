@@ -114,7 +114,7 @@
             let nameArr=file.name.split('.');
             let type=nameArr[nameArr.length-1].toLowerCase();
             const isLt2M = file.size / 1024 / 1024 < 2;
-            const isTrueFormat = /jpeg|jpg|png|gif/i.test(type);
+            const isTrueFormat = /jpeg|bmp|jpg|png|gif/i.test(type);
             !isLt2M&&this.$message.error('图片不能超过2Mb')
             !isTrueFormat&&this.$message.error('不识别此格式文件');
             if(isLt2M&&isTrueFormat){
@@ -151,7 +151,7 @@
             let nameArr=file.name.split('.');
             let type=nameArr[nameArr.length-1].toLowerCase();
             const isLt2M = file.size / 1024 / 1024 < 2;
-            const isTrueFormat = /jpeg|jpg|png|gif/i.test(type);
+            const isTrueFormat = /jpeg|bmp|jpg|png|gif/i.test(type);
             !isLt2M&&this.$message.error('图片不能超过2Mb')
             !isTrueFormat&&this.$message.error('不识别此格式文件');
             return isTrueFormat&&isLt2M;

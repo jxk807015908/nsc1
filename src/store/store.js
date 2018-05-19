@@ -16,7 +16,8 @@ export default new Vuex.Store({
     socket:null,
     pageSize:10,
     expressArr:[],
-    remindTips:0
+    remindTips:0,
+    messagePush:''
   },
   mutations:{
 
@@ -30,7 +31,17 @@ export default new Vuex.Store({
       // context.state.socket.emit('login',value || this.state.userId);
       context.state.socket.emit('login',this.state.userId);
       context.state.socket.on('loginSuccess',function (arr) {
-        new Vue().$message({message:'socket连接成功',type:'success'})
+        new Vue().$message({message:'socket连接成功',type:'success'});
+        let messagePush=sessionStorage.getItem("messagePush");
+        if(messagePush.indexOf('1')===-1){
+          console.log('好友上线推送关闭');
+          context.state.socket.removeAllListeners('friendLoginRemand');
+          context.state.socket.removeAllListeners('friendDisconnectRemand');
+        }
+        if(messagePush.indexOf('2')===-1){
+          console.log('好友消息推送关闭');
+          context.state.socket.removeAllListeners('getMessageToHead');
+        }
       });
       // context.state.socket.on('videoRequest',function (obj) {
       //   // new Vue().$notify({
@@ -91,6 +102,58 @@ export default new Vuex.Store({
     },
     socketDisconnect(context){
       context.state.socket.disconnect();
+    },
+    friendRemand(context,flag){
+      // context.state.socket.on('videoRequest',function (obj) {
+      //   // new Vue().$notify({
+      //   //   title: '提示',
+      //   //   dangerouslyUseHTMLString: true,
+      //   //   message: `<p>${obj.name}向您发起视频请求</p><button></button>`,
+      //   //   duration: 0
+      //   // });
+      //   new Vue().$confirm(`${obj.name}向您发起视频请求,是否允许？`, '提示', {
+      //     confirmButtonText: '是',
+      //     cancelButtonText: '否',
+      //     type: 'warning'
+      //   }).then(() => {
+      //     socket.emit('agreeVideoRequest',obj)
+      //   }).catch(() => {
+      //     this.$message({
+      //       type: 'info',
+      //       message: '已拒绝视频通话请求'
+      //     });
+      //   });
+      // });
+      // context.state.socket.on('agreeVideoRequest',(obj)=>{
+      //
+      // });
+      // context.state.socket.on('getMessage',(obj)=>{
+      //   new Vue().$message({message:'你收到一条消息',type:'success'})
+      // });
+      console.log('好友上线推送关闭');
+      context.state.socket.removeAllListeners('friendLoginRemand');
+      context.state.socket.removeAllListeners('friendDisconnectRemand');
+      if(flag){
+        console.log('好友上线推送开启');
+        context.state.socket.on('friendLoginRemand',(obj)=>{
+          new Vue().$notify({
+            title: 'tip',
+            message:'你的好友'+obj.name+'已上线',
+            position: 'bottom-right',
+            duration:3000
+          });
+          // new Vue().$message({message:'你的好友'+obj.name+'已上线',type:'success'})
+        });
+        context.state.socket.on('friendDisconnectRemand',(obj)=>{
+          new Vue().$notify({
+            title: 'tip',
+            message:'你的好友'+obj.name+'已下线',
+            position: 'bottom-right',
+            duration:3000
+          });
+          // new Vue().$message({message:'你的好友'+obj.name+'已下线',type:'success'})
+        });
+      }
     }
   }
 })

@@ -195,7 +195,8 @@
         groupDetailData: {},
         curGroupDetailData: {},
         friendDetailFlag: false,
-        friendDetailData: {}
+        friendDetailData: {},
+        isSocketListen:false
       };
     },
     computed: {
@@ -235,6 +236,19 @@
         }
       });
       // this.getExpress(false);
+    },
+    activated() {
+      this.getAllGroups().then(() => {
+        if (this.$route.params.groupId !== undefined) {
+          // this.curGroupId = this.$route.params.groupId;
+          // this.curGroup = this.groupsList.createGroup.filter(obj=>obj.groupId === this.curGroupId)[0] ||this.groupsList.joinGroup.filter(obj=>obj.groupId === this.curGroupId)[0];
+          // console.log(this.curGroupId);
+          // console.log(this.groupsList);
+          let isCreated = this.groupsList.createGroup.some(obj => obj.groupId === this.$route.params.groupId);
+          this.$refs.groupMenu.open(isCreated ? '0' : '1');
+          this.select(this.$route.params.groupId, [isCreated ? '0' : '1', this.$route.params.groupId])
+        }
+      });
     },
     methods: {
       // openFriendDetail(userId) {
@@ -320,7 +334,7 @@
       //                 messageType: obj.GM_MessageType,
       //                 filePath: obj.GM_FilePath
       //               });
-      //             } else if (/jpeg|jpg|png|gif/i.test(type)) {
+      //             } else if (/jpeg|bmp|jpg|png|gif/i.test(type)) {
       //               this.messageRecord.unshift({
       //                 message: `<img src='http://${this.$store.state.statisFileIp + obj.GM_FilePath}'></img>`,
       //                 senderId: obj.GM_FromID,
@@ -436,7 +450,7 @@
       //   let nameArr = file.name.split('.');
       //   let type = nameArr[nameArr.length - 1].toLowerCase();
       //   const isLt10M = file.size / 1024 / 1024 < 10;
-      //   const isTrueFormat = /mov|avi|flv|mp4|rmvb|mkv|jpeg|jpg|png|gif/i.test(type);
+      //   const isTrueFormat = /mov|avi|flv|mp4|rmvb|mkv|jpeg|bmp|jpg|png|gif/i.test(type);
       //   !isLt10M && this.$message.error('文件不能超过10Mb')
       //   !isTrueFormat && this.$message.error('不识别此格式文件')
       //   return isTrueFormat && isLt10M;
@@ -461,7 +475,7 @@
       //       uName: res.data.uName,
       //       messageType: 3
       //     });
-      //   } else if (/jpeg|jpg|png|gif/i.test(type)) {
+      //   } else if (/jpeg|bmp|jpg|png|gif/i.test(type)) {
       //     this.messageRecord.push({
       //       senderId: this.$store.state.userId,
       //       name: this.$store.state.nickName || this.$store.state.userId,
@@ -647,9 +661,13 @@
       }
     },
     watch: {
-      // socket: {
-      //   handler(value,oldValue) {
-      //     if (value&&oldValue===null) {
+      socket: {
+        handler(value,oldValue) {
+          if (value&&this.isSocketListen===false) {
+            value.on('refreshGroup', (item) => {
+              this.getAllGroups();
+            });
+            this.isSocketListen=true;
       //       this.$store.state.socket.removeAllListeners('getMessage');
       //       this.$store.state.socket.on('getMessage', (item) => {
       //         if (item.groupId === undefined) return;
@@ -670,10 +688,10 @@
       //           this.$router.push({name: 'myGroups'});
       //         }
       //       });
-      //     }
-      //   },
-      //   deep: true
-      // }
+          }
+        },
+        deep: true
+      }
     },
     components: {
       aMessage,

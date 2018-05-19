@@ -82,7 +82,8 @@
         checkedIndex: '',
         groupDetailData:{},
         friendDetailData:{},
-        detailData:{}
+        detailData:{},
+        isSocketListen:false
       };
     },
     components: {
@@ -93,6 +94,17 @@
     },
     created() {
       this.getAllRemind();
+    },
+    activated() {
+      this.getAllRemind();
+    },
+    computed:{
+      socket(){
+        return this.$store.state.socket
+      },
+      tips(){
+        return this.$store.state.remindTips
+      }
     },
     methods: {
       getUserInfo(userId){
@@ -161,6 +173,8 @@
         this.$http.post('/joinGroup2.do', params).then(res => {
           if (res.data.success) {
             this.$message({message: '成功加群', type: 'success'});
+            this.$store.state.socket.emit('sendRemind',{toId:this.remindList[this.checkedIndex].fromId});
+            params.messageType == '8'&&this.$store.state.socket.emit('refreshGroup',{toId:this.remindList[this.checkedIndex].fromId});
             this.checkedIndex = '';
             this.getAllRemind();
           }
@@ -254,6 +268,7 @@
         this.$http.post('/rejectRequest.do', params).then(res => {
           if (res.data.success) {
             this.$message({message: '已拒绝', type: 'success'});
+            this.$store.state.socket.emit('sendRemind',{toId:this.remindList[this.checkedIndex].fromId});
             this.checkedIndex = '';
             this.getAllRemind();
           }
@@ -270,6 +285,8 @@
               this.$message({message: res.data.msg, type: 'success'});
               this.$http.post('/deleteRemind.do', {id: this.remindList[this.checkedIndex].id}).then(res => {
                 if (res.data.success) {
+                  this.$store.state.socket.emit('sendRemind',{toId:this.remindList[this.checkedIndex].fromId});
+                  this.$store.state.socket.emit('refreshFriend',{toId:this.remindList[this.checkedIndex].fromId});
                   this.checkedIndex = '';
                   this.getAllRemind();
                 }
@@ -285,6 +302,7 @@
           this.$http.post('/getAllRemind.do', {userId: sessionStorage.getItem('userId')}).then(res => {
             if (res.data.success) {
               let temp = [];
+              let tipNum=0;
               res.data.data.forEach(obj => {
                 temp.push({
                   fromId: obj.UM_FromID,
@@ -296,14 +314,38 @@
                   remark: ['6', '7', '8', '9'].includes(obj.UM_MessageType) ? JSON.parse(obj.UM_Remark) : obj.UM_Remark,
                   id: obj.UM_ID,
                   tipNum:obj.UM_TipNum
-                })
+                });
+                if(obj.UM_IsRead==="0"){
+                  tipNum+=obj.UM_TipNum;
+                }
               });
+              this.$store.state.remindTips=tipNum;
               this.remindList = temp;
               // console.log(this.remindList);
               resolve();
             }
           })
         })
+      }
+    },
+    watch:{
+      socket(val){
+        if(val&&this.isSocketListen===false){
+          // val.removeAllListeners('RefreshRemind');
+          val.on('RefreshRemind',()=> {
+            this.getAllRemind();
+          });
+          this.isSocketListen=true;
+          // val.on('RefreshRemind',()=> {
+          //   this.getAllRemind();
+          // });
+          // val.on('getMessage', () => {
+          //   this.getAllRemind();
+          // });
+        }
+      },
+      tips(){
+        this.getAllRemind();
       }
     }
   }

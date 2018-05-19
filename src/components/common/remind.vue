@@ -1,9 +1,9 @@
 <template>
   <div :class="{remind:true,checked:isChecked}" @click="messageCheck">
-    <span v-if="data.isRead==='0'&&data.tipNum" class="new">new</span>
+    <span v-if="data.isRead==='0'&&data.tipNum&&!isChecked" class="new">new</span>
     <i class="el-icon-close" @click.stop="deleteRemind"></i>
     <div v-if="data.messageType==='1'" class="chatObj">
-      <el-badge :value="data.tipNum" class="item" v-if="data.tipNum&&data.isRead==='0'">
+      <el-badge :value="data.tipNum" class="item" v-if="data.tipNum&&data.isRead==='0'&&!isChecked">
         <span>1</span>
       </el-badge>
       <headPortrait v-if="data.remark==='group'&&groupIcon" :imgUrl="groupIcon" @imgClick="imgClick"

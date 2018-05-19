@@ -1,5 +1,5 @@
 <template>
-  <div class="chatWindow">
+  <div class="chatWindow" v-if="isShow">
     <friendDetailDialog :dialogFlag.sync="friendDetailFlag" :openData="friendDetailData"></friendDetailDialog>
     <el-container>
       <el-main ref="message" :class="{small:this.$store.state.isVideo}">
@@ -79,7 +79,9 @@
         openTime: '',
         isLoadingImage: false,
         friendDetailData: {},
-        expressArr: JSON.parse(JSON.stringify(this.$store.state.expressArr))
+        expressArr: JSON.parse(JSON.stringify(this.$store.state.expressArr)),
+        isShow:true,
+        isDestroyed:false
       };
     },
     computed: {
@@ -93,21 +95,40 @@
         if (this.chatType === 1) {
           return `/uploadPicture.do?userId=${this.$store.state.userId}&&friendId=${this.chatId}`;
         } else {
-          return `/uploadGroupPicture.do?userId=${this.$store.state.userId}&&groupId=${this.chatId}&&uName=${this.detailData.members.filter(obj => obj.memberId === this.$store.state.userId)[0].groupNick || this.$store.state.nickName || this.$store.state.userId}`
+          if(this.detailData.members.some(obj => obj.memberId === this.$store.state.userId)){
+            return `/uploadGroupPicture.do?userId=${this.$store.state.userId}&&groupId=${this.chatId}&&uName=${this.detailData.members.filter(obj => obj.memberId === this.$store.state.userId)[0].groupNick || this.$store.state.nickName || this.$store.state.userId}`
+          }else{
+            return ''
+          }
         }
       },
       fileAction() {
         if (this.chatType === 1) {
           return `/uploadFile.do?userId=${this.$store.state.userId}&&friendId=${this.chatId}`;
         } else {
-          return `/uploadGroupFile.do?userId=${this.$store.state.userId}&&groupId=${this.chatId}&&uName=${this.detailData.members.filter(obj => obj.memberId === this.$store.state.userId)[0].groupNick || this.$store.state.nickName || this.$store.state.userId}`
+          if(this.detailData.members.some(obj => obj.memberId === this.$store.state.userId)){
+            return `/uploadGroupFile.do?userId=${this.$store.state.userId}&&groupId=${this.chatId}&&uName=${this.detailData.members.filter(obj => obj.memberId === this.$store.state.userId)[0].groupNick || this.$store.state.nickName || this.$store.state.userId}`
+          }else{
+            return ''
+          }
         }
       }
     },
     mounted() {
       this.init();
     },
+    destroyed(){
+      this.isDestroyed=true;
+      // alert("destroyed");
+    },
     methods: {
+      getNewTips() {
+        this.$http.post('/getNewTips.do', {userId: sessionStorage.getItem('userId')}).then(res => {
+          if (res.data.success) {
+            this.$store.state.remindTips = res.data.data.remindTips;
+          }
+        })
+      },
       getDetailData(){
         let path;
         if(this.chatType===1){
@@ -172,7 +193,7 @@
         let nameArr = file.name.split('.');
         let type = nameArr[nameArr.length - 1].toLowerCase();
         const isLt10M = file.size / 1024 / 1024 < 10;
-        const isTrueFormat = /mov|avi|flv|mp4|rmvb|mkv|jpeg|jpg|png|gif/i.test(type);
+        const isTrueFormat = /mov|avi|flv|mp4|rmvb|mkv|jpeg|bmp|jpg|png|gif/i.test(type);
         !isLt10M && this.$message.error('文件不能超过10Mb')
         !isTrueFormat && this.$message.error('不识别此格式文件')
         return isTrueFormat && isLt10M;
@@ -196,7 +217,7 @@
               to: res.data.to,
               messageType: 3,
             });
-          } else if (/jpeg|jpg|png|gif/i.test(type)) {
+          } else if (/jpeg|bmp|jpg|png|gif/i.test(type)) {
             this.messageRecord.push({
               senderId: this.$store.state.userId,
               name: this.$store.state.nickName || this.$store.state.userId,
@@ -229,7 +250,7 @@
               uName: res.data.uName,
               messageType: 3
             });
-          } else if (/jpeg|jpg|png|gif/i.test(type)) {
+          } else if (/jpeg|bmp|jpg|png|gif/i.test(type)) {
             this.messageRecord.push({
               senderId: this.$store.state.userId,
               name: this.$store.state.nickName || this.$store.state.userId,
@@ -364,28 +385,35 @@
         }
       },
       init() {
+        this.isDestroyed=false;
         this.messageRecord = [];
         this.pageNo = 1;
         this.total = 0;
+        this.isShow = true;
         this.openTime = new Date().getTime();
         if (this.chatType === 1) {
           this.getFriendMessage().then(() => {
             this.$nextTick(() => {
-              toBottom(this.$refs.message.$el);
+              if(this.isShow){
+                this.toTopEvent();
+                toBottom(this.$refs.message.$el);
+              }
             });
           })
         } else {
           this.getGroupMessage().then(() => {
             this.$nextTick(() => {
-              toBottom(this.$refs.message.$el);
+              if(this.isShow){
+                this.toTopEvent();
+                toBottom(this.$refs.message.$el);
+              }
             });
           })
         }
-        this.toTopEvent();
         this.listenMessage();
       },
       getFriendMessage() {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           this.isMessageLoading = true;
           this.$http.post('/getFriendMessage.do', {
             openTime: this.openTime,
@@ -396,6 +424,12 @@
           }).then(res => {
             if (res.data.success) {
               this.total = res.data.total;
+              this.getNewTips();
+              // this.$store.state.socket.emit("getMessage",{
+              //   userId: sessionStorage.getItem('userId'),
+              //   friendId: this.chatId,
+              //   type:this.chatType
+              // });
               res.data.data.length !== 0 && res.data.data.forEach(obj => {
                 let friendName;
                 let newMessage = obj.M_PostMessages;
@@ -414,7 +448,7 @@
                       messageType: obj.M_MessageTypeID,
                       filePath: obj.M_FilePath
                     });
-                  } else if (/jpeg|jpg|png|gif/i.test(type)) {
+                  } else if (/jpeg|bmp|jpg|png|gif/i.test(type)) {
                     this.messageRecord.unshift({
                       message: `<img src='http://${this.$store.state.statisFileIp + obj.M_FilePath}'></img>`,
                       senderId: obj.M_FromUserID,
@@ -449,6 +483,10 @@
                 resolve();
               });
             }
+            if(res.data.code===1){
+              this.messageRecord={};
+              this.isShow=false;
+            }
             // console.log(this.messageRecord);
             this.isMessageLoading = false;
           }).catch(() => {
@@ -457,16 +495,23 @@
         });
       },
       getGroupMessage() {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           this.isMessageLoading = true;
           this.$http.post('/getGroupMessage.do', {
             openTime: this.openTime,
             pageNo: this.pageNo,
             pageSize: this.$store.state.pageSize,
-            groupId: this.chatId
+            groupId: this.chatId,
+            userId:this.$store.state.userId
           }).then(res => {
             if (res.data.success) {
               this.total = res.data.total;
+              this.getNewTips();
+              // this.$store.state.socket.emit("getMessage",{
+              //   userId: sessionStorage.getItem('userId'),
+              //   friendId: this.chatId,
+              //   type:this.chatType
+              // });
               res.data.data.length !== 0 && res.data.data.forEach(obj => {
                 let newMessage = obj.GM_Message;
                 if ([3, 4].includes(obj.GM_MessageType)) {
@@ -481,7 +526,7 @@
                       messageType: obj.GM_MessageType,
                       filePath: obj.GM_FilePath
                     });
-                  } else if (/jpeg|jpg|png|gif/i.test(type)) {
+                  } else if (/jpeg|bmp|jpg|png|gif/i.test(type)) {
                     this.messageRecord.unshift({
                       message: `<img src='http://${this.$store.state.statisFileIp + obj.GM_FilePath}'></img>`,
                       senderId: obj.GM_FromID,
@@ -516,6 +561,10 @@
               });
               resolve();
             }
+            if(res.data.code===1){
+              this.messageRecord={};
+              this.isShow=false;
+            }
             this.isMessageLoading = false;
           }).catch(() => {
             this.isMessageLoading = false;
@@ -545,9 +594,21 @@
       },
       listenMessage(){
         this.$store.state.socket.on('getMessage', (item) => {
+          // alert("getMessage");
+          // alert(this.isDestroyed);
           // console.log(item);
+          if(this.isDestroyed) return;
           if (item.groupId !== undefined){
             if (item.groupId === this.chatId) {
+              this.$http.post('/updateRemind.do',{
+                fromId:this.chatId,
+                userId:this.$store.state.userId,
+                type:this.chatType
+              }).then(res=>{
+                if(res.data.success){
+                  this.getNewTips();
+                }
+              });
               this.messageRecord.push({
                 senderId: item.from,
                 name: item.uName,
@@ -562,6 +623,16 @@
             }
           } else{
             if (item.from === this.chatId) {
+              this.$http.post('/updateRemind.do',{
+                fromId:this.chatId,
+                userId:this.$store.state.userId,
+                type:this.chatType
+              }).then(res=>{
+                if(res.data.success){
+                  this.getNewTips();
+                  // this.$store.state.socket.emit('sendRemind',{toId:this.chatId});
+                }
+              });
               let friendName = this.detailData.remark || this.detailData.nickName || this.detailData.friendId;
               this.messageRecord.push({
                 senderId: item.from,

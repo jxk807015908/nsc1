@@ -1,6 +1,6 @@
 <template>
   <div class="searchGroupsDialog">
-    <dialogs :dialogFlag.sync="dialogFlag" :openTitle="'搜索群'" :isDefaultBtn="false" @close="close">
+    <dialogs :dialogFlag.sync="dialogFlag" :openTitle="'搜索群'" :isDefaultBtn="false" @close="close" @open="open">
       <div slot="dialogContent">
         <div class="search">
           <el-input placeholder="请输入群ID或名称" v-model="postParams" class="input-with-select">
@@ -11,7 +11,7 @@
           <div :class="{checked:checkedIndex===index}" class="user clearfix" :key="index"
                v-for="(obj,index) in searchList" @click="checkedIndex=index">
             <headPortrait :isSave="true" :imgUrl="obj.groupIcon"
-                          @imgClick="$parent.imgClick(['0',obj.groupId])"></headPortrait>
+                          @imgClick="$parent.imgClick(obj.groupId)"></headPortrait>
             <div class="base-data fl">
               <p>ID:{{obj.groupId}}</p>
               <p v-if="!['',null].includes(obj.groupName)">名称:{{obj.groupName}}</p>
@@ -43,6 +43,10 @@
       }
     },
     methods: {
+      open(){
+        this.postParams='';
+        this.searchList=[];
+      },
       requestJoinGroup(index) {
         let params = {
           userId: sessionStorage.getItem('userId'),
@@ -53,6 +57,10 @@
           if (res.data.success) {
             this.$message({message:'发送请求成功', type: 'success'});
             this.$parent.getAllGroups();
+            this.$store.state.socket.emit('sendRemind',{
+              toId:this.searchList[index].groupId,
+              type:2
+            })
           }
         })
       },

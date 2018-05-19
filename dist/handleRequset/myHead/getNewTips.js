@@ -21,7 +21,7 @@ exports.getNewTips = (app) => {
       selectUserMessagesFn({toId: dataObject.userId, isRead: '0'}).then((result) => {
         let remindTips = 0;
         result.forEach(obj => {
-          console.log(obj);
+          // console.log(obj);
           if (obj.UM_MessageType === '1') {
             remindTips += obj.UM_TipNum;
           } else {

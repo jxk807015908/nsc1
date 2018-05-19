@@ -1,6 +1,6 @@
 <template>
   <div class="addFriendDialog">
-    <dialogs :dialogFlag.sync="dialogFlag" :openTitle="'添加好友'" :isDefaultBtn="false" @close="close">
+    <dialogs :dialogFlag.sync="dialogFlag" :openTitle="'添加好友'" :isDefaultBtn="false" @close="close" @open="open">
       <div slot="dialogContent">
         <div class="search">
           <el-input placeholder="请输入对方账号或昵称" v-model="postParams" class="input-with-select">
@@ -45,13 +45,17 @@
       };
     },
     methods: {
+      open(){
+        this.postParams='';
+        this.searchList=[];
+      },
       addFriend(index) {
         let params = {
           userId: sessionStorage.getItem('userId'),
           userName: this.$store.state.nickName,
           friendId: this.searchList[index].userId,
           friendPolicyType: this.searchList[index].friendPolicyType
-        }
+        };
         if (this.searchList[index].friendPolicyType === 0) {
           this.$http.post('/addFriend.do', params).then(res => {
             if (res.data.success) {
@@ -101,6 +105,11 @@
                     })
                   } else if (res.data.msg === '好友请求已发送') {
                     this.$message({message: res.data.msg, type: 'success'});
+                    this.$store.state.socket.emit('sendRemind',{toId:this.searchList[index].userId});
+                    (async () => {
+                      await this.$parent.getFriendGroup();
+                      await this.$parent.getFriend();
+                    })();
                   } else {
                     this.$message.error(res.data.msg)
                   }

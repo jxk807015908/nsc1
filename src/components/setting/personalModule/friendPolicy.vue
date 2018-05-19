@@ -59,6 +59,7 @@
               return
             };
             this.$http.post('/updateUserInfo.do',{
+              userId:this.$store.state.userId,
               friendPolicyId:this.friendPolicyType,
               friendPolicyQuestion:this.provingQuesttion===''?null:this.provingQuesttion,
               friendPolicyPassword:this.provingPassword===''?null:this.provingPassword,

@@ -3,7 +3,7 @@ const searchUser=require("../../businessLayer/user/searchUser");
 exports.login=(app)=>{
   app.post('/login.do',(req,res)=>{
     let isSend=false;
-    res.setTimeout(3000,()=>{
+    res.setTimeout(10000,()=>{
       isSend=true;
       res.send({
         code:10000,

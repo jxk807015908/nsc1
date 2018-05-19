@@ -14,6 +14,7 @@ exports.changeUserKey=(n)=>{
     case 'friendPolicyQuestion':return 'U_FriendPolicyQuestion';
     case 'friendPolicyAnswer':return 'U_FriendPolicyAnswer';
     case 'friendPolicyPassword':return 'U_FriendPolicyPassword';
+    case 'messagePush':return 'U_MessagePush';
     default:return null;
   }
 };

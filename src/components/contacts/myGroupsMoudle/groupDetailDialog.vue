@@ -161,7 +161,8 @@
         },
         friendGroup: [],
         friendDetailData: {},
-        friendDetailFlag: false
+        friendDetailFlag: false,
+        isInviteLoading:false
       };
     },
     methods: {
@@ -301,13 +302,18 @@
           }
         })
       },
-      select(index, indexPath) {
+      select(index) {
         if (this.openData.members.some(obj => obj.memberId === index)) {
           this.$message.error('该用户已在群中');
           return;
         }
-        let remark = this.openData;
+        if(this.isInviteLoading) {
+          this.$message.error('正在发送邀请，请稍等！');
+          return
+        }
+        let remark = JSON.parse(JSON.stringify(this.openData));
         delete remark.members;
+        this.isInviteLoading=true;
         this.$http.post('/inviteGroup.do', {
           toId: index,
           fromId: this.$store.state.userId,
@@ -315,8 +321,18 @@
           fromName: this.$store.state.nickName
         }).then(res => {
           if (res.data.success) {
-            this.$message({message: '已发送邀请', type: 'success'})
+            this.$message({message: '已发送邀请', type: 'success'});
+            this.$store.state.socket.emit('sendRemind',{
+              toId: index,
+              fromId: this.$store.state.userId,
+              remark: remark,
+              fromName: this.$store.state.nickName,
+              messageType: 6
+            })
           }
+          this.isInviteLoading=false;
+        }).catch(()=>{
+          this.isInviteLoading=false;
         })
       },
       handleChange() {
@@ -375,7 +391,7 @@
         let nameArr = file.name.split('.');
         let type = nameArr[nameArr.length - 1].toLowerCase();
         const isLt2M = file.size / 1024 / 1024 < 2;
-        const isTrueFormat = /jpeg|jpg|png|gif/i.test(type);
+        const isTrueFormat = /jpeg|bmp|jpg|png|gif/i.test(type);
         !isLt2M && this.$message.error('图片不能超过2Mb')
         !isTrueFormat && this.$message.error('不识别此格式文件');
         if (isLt2M && isTrueFormat) {

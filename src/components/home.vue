@@ -33,6 +33,13 @@
         }
       },
       methods:{
+        getNewTips() {
+          this.$http.post('/getNewTips.do', {userId: sessionStorage.getItem('userId')}).then(res => {
+            if (res.data.success) {
+              this.$store.state.remindTips = res.data.data.remindTips;
+            }
+          })
+        },
         closeVideo(){
           this.pc.close();
           this.videoStreamTrack.stop();
@@ -177,9 +184,9 @@
         }
       },
       watch:{
-        socket(val){
-          if(val){
-            val.removeAllListeners('videoRequest');
+        socket(val,oldVal){
+          if(val&&oldVal===null){
+            // val.removeAllListeners('videoRequest');
             val.on('videoRequest',obj=>{
               if(document.getElementsByClassName(`${obj.from.id}Requset`)[0]) return;
               let notify=this.$notify({
@@ -229,6 +236,7 @@
             });
             val.on('duplicateLogin',()=> {
               this.$store.dispatch('socketDisconnect');
+              sessionStorage.removeItem('userId');
               this.$alert('您的账号在其他地址登录！该账号即将下线。', '提示', {
                 confirmButtonText: '确定',
                 callback: action => {
@@ -237,10 +245,15 @@
                 }
               });
             });
+            // val.on('getNewRemind',(obj)=> {
+            //   this.getNewTips();
+            //   // this.$store.state.remindTips++;
+            // });
           }
         }
       },
       mounted(){
+        this.getNewTips();
         // var hiddenProperty = 'hidden' in document ? 'hidden' :
         //   'webkitHidden' in document ? 'webkitHidden' :
         //     'mozHidden' in document ? 'mozHidden' :
@@ -272,6 +285,8 @@
                 this.$store.state.userId=sessionStorage.getItem('userId');
                 this.$store.state.nickName=res.data.data.U_NickName||'';
                 setCookie('userId',sessionStorage.getItem('userId'));
+                sessionStorage.setItem('messagePush',res.data.data.U_MessagePush);
+                this.$store.state.messagePush=res.data.data.U_MessagePush;
                 this.$store.dispatch('connectSocket');
               }
             })

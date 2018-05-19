@@ -61,6 +61,9 @@ const getYourGroupRequest=require('./myGroups/getYourGroupRequest');
 const joinGroup2=require('./myGroups/joinGroup2');
 const getNewTips=require('./myHead/getNewTips');
 const readRemind=require('./myMessages/readRemind');
+const updateRemind=require('./myMessages/updateRemind');
+const sendRegEmail=require('./login/sendRegEmail');
+const emailReg=require('./login/emailReg');
 exports.handle=(app)=>{
   // const mysql=require('mysql');
   // const connection=mysql.createConnection({
@@ -120,5 +123,8 @@ exports.handle=(app)=>{
   joinGroup2.joinGroup2(app);
   getNewTips.getNewTips(app);
   readRemind.readRemind(app);
+  updateRemind.updateRemind(app);
+  sendRegEmail.sendRegEmail(app);
+  emailReg.emailReg(app);
 }
 

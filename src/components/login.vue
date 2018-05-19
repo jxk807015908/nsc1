@@ -1,8 +1,8 @@
 <template>
   <div class="login">
     <!--<img src="../assets/imgages/loginbg2.jpg" alt="">-->
-    <div class="warp">
-      <div v-show="!isRegister" class="login-warp">
+    <div class="warp" :class="{registerWarp:isRegister}">
+      <div v-show="!isRegister" >
         <div class="input-group">
           <label for="userId">账号:</label>
           <el-input v-model="userId" id="userId"></el-input>
@@ -167,6 +167,18 @@
               this.isRegister=false;
             }
           })
+          // this.$http.get('/sendRegEmail.do',{
+          //   params:{
+          //     userId:this.registerParams.userId,
+          //     password:this.registerParams.fPassword,
+          //     email:this.registerParams.email
+          //   }
+          // }).then(res=>{
+          //   if(res.data.success){
+          //     this.$message({message:'邮件发送成功',type:'success'});
+          //     this.isRegister=false;
+          //   }
+          // })
         },
         clickRemember(){
           localStorage.isRemember=this.$refs.remember.checked;
@@ -200,6 +212,8 @@
             if(res.data.success){
               sessionStorage.setItem('userId',this.userId);
               sessionStorage.setItem('password',this.password);
+              sessionStorage.setItem('messagePush',res.data.data.U_MessagePush);
+              this.$store.state.messagePush=res.data.data.U_MessagePush;
               this.$store.state.userId=this.userId;
               this.$store.state.nickName=res.data.data.U_NickName;
               setCookie('userId',this.userId);
@@ -285,6 +299,9 @@
           }
         }
       }
+    }
+    .registerWarp{
+      top:calc(~'50% - 200px')
     }
     input:-webkit-autofill {
       -webkit-box-shadow: 0 0 0px 1000px white inset;

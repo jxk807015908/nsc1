@@ -21,7 +21,7 @@ exports.quitGroup = (app) => {
       data = decodeURI(data);
       let dataObject = JSON.parse(data);
       deleteUserGroupsToUserFn({userId: dataObject.userId, groupId: dataObject.groupId}).then(result=>{
-        console.log(result);
+        // console.log(result);
         (!isSend) && res.send({
           code: 10000,
           data: null,

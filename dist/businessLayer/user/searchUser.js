@@ -2,7 +2,7 @@ const databaseSettting = require('../databaseSetting');
 // const changeToTableKey = require('../changeToTableKey').changeToTableKey;
 exports.searchUser = (params, callback) => {
     let connection = databaseSettting.databaseSettting();
-    let sql='SELECT U_NickName FROM User WHERE';
+    let sql='SELECT U_NickName,U_MessagePush FROM User WHERE';
     let i=0;
     // Object.keys(params).forEach(key=>{
     //   if(changeToTableKey(key)){

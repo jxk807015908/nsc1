@@ -157,7 +157,8 @@
         // openTime: '',
         // isLoadingImage: true,
         friendDetailData:{},
-        // curFriendDetailData:{}
+        // curFriendDetailData:{},
+        isSocketListen:false
       };
     },
     computed: {
@@ -189,11 +190,18 @@
       })();
       // this.getExpress(false)
     },
-    // activated() {
-    //   if (this.$route.params.friendId !== undefined) {
-    //     this.curFriendId = this.$route.params.friendId;
-    //   }
-    // },
+    activated() {
+      (async () => {
+        await this.getFriendGroup();
+        await this.getFriend();
+        if (this.$route.params.friendId !== undefined) {
+          this.curFriendId = this.$route.params.friendId;
+          let belongGroup=this.friendGroup.filter(obj=>obj.content.some(obj2=>obj2.friendId===this.curFriendId))[0];
+          this.$refs.friendMenu.open(belongGroup.value);
+          this.select(this.$route.params.friendId,[belongGroup.value,this.$route.params.friendId]);
+        }
+      })();
+    },
     methods: {
       imgClick(userId){
         this.$http.post('/getUserInfo.do',{userId:userId}).then(res=>{
@@ -247,7 +255,7 @@
       //   let nameArr = file.name.split('.');
       //   let type = nameArr[nameArr.length - 1].toLowerCase();
       //   const isLt10M = file.size / 1024 / 1024 < 10;
-      //   const isTrueFormat = /mov|avi|flv|mp4|rmvb|mkv|jpeg|jpg|png|gif/i.test(type);
+      //   const isTrueFormat = /mov|avi|flv|mp4|rmvb|mkv|jpeg|bmp|jpg|png|gif/i.test(type);
       //   !isLt10M && this.$message.error('文件不能超过10Mb')
       //   !isTrueFormat && this.$message.error('不识别此格式文件')
       //   return isTrueFormat && isLt10M;
@@ -271,7 +279,7 @@
       //       to: res.data.to,
       //       messageType: 3,
       //     });
-      //   } else if (/jpeg|jpg|png|gif/i.test(type)) {
+      //   } else if (/jpeg|bmp|jpg|png|gif/i.test(type)) {
       //     this.messageRecord.push({
       //       senderId: this.$store.state.userId,
       //       name: this.$store.state.nickName || this.$store.state.userId,
@@ -550,7 +558,7 @@
       //                 messageType: obj.M_MessageTypeID,
       //                 filePath: obj.M_FilePath
       //               });
-      //             } else if (/jpeg|jpg|png|gif/i.test(type)) {
+      //             } else if (/jpeg|bmp|jpg|png|gif/i.test(type)) {
       //               this.messageRecord.unshift({
       //                 message: `<img src='http://${this.$store.state.statisFileIp + obj.M_FilePath}'></img>`,
       //                 senderId: obj.M_FromUserID,
@@ -722,9 +730,16 @@
       //     })
       //   }
       // },
-      // socket: {
-      //   handler(value, oldValue) {
-      //     if (value&&oldValue===null) {
+      socket: {
+        handler(value, oldValue) {
+          if (value&&this.isSocketListen===false) {
+            value.on('refreshFriend', (item) => {
+              (async () => {
+                await this.getFriendGroup();
+                await this.getFriend();
+              })()
+            });
+            this.isSocketListen=true;
       //       this.$store.state.socket.removeAllListeners('getMessage');
       //       this.$store.state.socket.on('getMessage', (item) => {
       //         if (item.groupId !== undefined) return;
@@ -788,10 +803,10 @@
       //           })
       //         })
       //       });
-      //     }
-      //   },
-      //   deep: true
-      // }
+          }
+        },
+        deep: true
+      }
     },
     components: {
       aMessage,

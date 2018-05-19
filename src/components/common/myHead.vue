@@ -21,7 +21,6 @@
         <el-menu-item index="3-1">我的好友</el-menu-item>
         <el-menu-item index="3-2">我的群</el-menu-item>
       </el-submenu>
-      <el-menu-item index="4">消息中心</el-menu-item>
     </el-menu>
     <div class="user">
       <span class="username">{{$store.state.nickName||$store.state.userId}}</span>
@@ -48,13 +47,15 @@
         userOperateArr: [{
           label: '个人中心',
           value: 1
-        }, {
-          label: '帮助中心',
-          value: 2
-        }, {
-          label: '关于nsc',
-          value: 3
-        }, {
+        },
+        //   {
+        //   label: '帮助中心',
+        //   value: 2
+        // }, {
+        //   label: '关于nsc',
+        //   value: 3
+        // },
+          {
           label: '退出账号',
           value: 4
         }],
@@ -71,6 +72,9 @@
     computed: {
       socket() {
         return this.$store.state.socket;
+      },
+      messagePush(){
+        return this.$store.state.messagePush;
       }
     },
     methods: {
@@ -115,9 +119,44 @@
           }
         })
       },
+      getMessageToHead(socket){
+        console.log('好友消息推送开启');
+        socket.on('getMessageToHead', (item) => {
+          // this.getNewTips();
+          if (item.groupId) {
+            let notify;
+            let time = new Date().getTime();
+            notify = this.$notify({
+              title: `群聊消息:${item.groupName}`,
+              dangerouslyUseHTMLString: true,
+              message: `<p>${item.uName}:</p><div style="text-indent:2em;">${item.messageType === 3 ? '[图像]' : item.messageType === 4 ? '[文件]' : item.message}</div><button class="answerFriend ${item.from}Button${time}">前去围观</button> `,
+              duration: 0
+            });
+            let button = document.getElementsByClassName(`${item.from}Button${time}`);
+            button[0].onclick = () => {
+              notify.close();
+              this.$router.push({name: 'myGroups', params: {groupId: item.groupId}})
+            };
+          } else {
+            let notify;
+            let time = new Date().getTime();
+            notify = this.$notify({
+              title: `好友消息`,
+              dangerouslyUseHTMLString: true,
+              message: `<p>${item.friendName || item.from}:</p><div style="text-indent:2em;">${item.messageType === 3 ? '[图像]' : item.messageType === 4 ? '[文件]' : item.message}</div><button class="answerFriend ${item.from}Button${time}">前往回复</button> `,
+              duration: 0
+            });
+            let button = document.getElementsByClassName(`${item.from}Button${time}`);
+            button[0].onclick = () => {
+              notify.close();
+              this.$router.push({name: 'myFriend', params: {friendId: item.from}})
+            };
+          }
+        });
+      }
     },
     mounted() {
-      this.getNewTips();
+      // this.getNewTips();
       this.getExpress();
       // this.$store.state.userId!==null&&(this.$refs.headPortrait.src=`http://localhost:8081/headProtrait/${this.$store.state.userId}.jpg?time=${new Date().getTime()}`);
       // this.$refs.headPortrait.src=`http://localhost:8081/headProtrait/${this.$store.state.userId}.jpg?time=${new Date().getTime()}`;
@@ -127,38 +166,44 @@
       socket: {
         handler(value, oldValue) {
           if (value && oldValue === null) {
-            this.$store.state.socket.removeAllListeners('getMessage');
-            this.$store.state.socket.on('getMessage', (item) => {
-              if (item.groupId) {
-                let notify;
-                let time = new Date().getTime();
-                notify = this.$notify({
-                  title: `群聊消息:${item.groupName}`,
-                  dangerouslyUseHTMLString: true,
-                  message: `<p>${item.uName}:</p><div style="text-indent:2em;">${item.messageType === 3 ? '[图像]' : item.messageType === 4 ? '[文件]' : item.message}</div><button class="answerFriend ${item.from}Button${time}">前去围观</button> `,
-                  duration: 0
-                });
-                let button = document.getElementsByClassName(`${item.from}Button${time}`);
-                button[0].onclick = () => {
-                  notify.close();
-                  this.$router.push({name: 'myGroups', params: {groupId: item.groupId}})
-                };
-              } else {
-                let notify;
-                let time = new Date().getTime();
-                notify = this.$notify({
-                  title: `好友消息`,
-                  dangerouslyUseHTMLString: true,
-                  message: `<p>${item.friendName || item.from}:</p><div style="text-indent:2em;">${item.messageType === 3 ? '[图像]' : item.messageType === 4 ? '[文件]' : item.message}</div><button class="answerFriend ${item.from}Button${time}">前往回复</button> `,
-                  duration: 0
-                });
-                let button = document.getElementsByClassName(`${item.from}Button${time}`);
-                button[0].onclick = () => {
-                  notify.close();
-                  this.$router.push({name: 'myFriend', params: {friendId: item.from}})
-                };
-              }
+            // this.$store.state.socket.removeAllListeners('getMessage');
+            value.on('getNewRemind',()=> {
+              this.getNewTips();
+              // this.$store.state.remindTips++;
             });
+            this.getMessageToHead(value);
+            // value.on('getMessageToHead', (item) => {
+            //   this.getNewTips();
+            //   if (item.groupId) {
+            //     let notify;
+            //     let time = new Date().getTime();
+            //     notify = this.$notify({
+            //       title: `群聊消息:${item.groupName}`,
+            //       dangerouslyUseHTMLString: true,
+            //       message: `<p>${item.uName}:</p><div style="text-indent:2em;">${item.messageType === 3 ? '[图像]' : item.messageType === 4 ? '[文件]' : item.message}</div><button class="answerFriend ${item.from}Button${time}">前去围观</button> `,
+            //       duration: 0
+            //     });
+            //     let button = document.getElementsByClassName(`${item.from}Button${time}`);
+            //     button[0].onclick = () => {
+            //       notify.close();
+            //       this.$router.push({name: 'myGroups', params: {groupId: item.groupId}})
+            //     };
+            //   } else {
+            //     let notify;
+            //     let time = new Date().getTime();
+            //     notify = this.$notify({
+            //       title: `好友消息`,
+            //       dangerouslyUseHTMLString: true,
+            //       message: `<p>${item.friendName || item.from}:</p><div style="text-indent:2em;">${item.messageType === 3 ? '[图像]' : item.messageType === 4 ? '[文件]' : item.message}</div><button class="answerFriend ${item.from}Button${time}">前往回复</button> `,
+            //       duration: 0
+            //     });
+            //     let button = document.getElementsByClassName(`${item.from}Button${time}`);
+            //     button[0].onclick = () => {
+            //       notify.close();
+            //       this.$router.push({name: 'myFriend', params: {friendId: item.from}})
+            //     };
+            //   }
+            // });
             // this.$store.state.socket.removeAllListeners('tipsNumChange');
             // this.$store.state.socket.on('tipsNumChange', (item) => {
             //   if (item.type === 1) {
@@ -168,6 +213,14 @@
           }
         },
         deep: true
+      },
+      messagePush(val,oldVal){
+        this.$store.dispatch('friendRemand',val.indexOf('1')!==-1);
+        console.log('好友消息推送关闭');
+        this.$store.state.socket.removeAllListeners('getMessageToHead');
+        if(val&&val.indexOf('2')!==-1){
+          this.getMessageToHead(this.$store.state.socket);
+        }
       }
     },
     // watch:{
@@ -233,6 +286,13 @@
     }
     .el-menu {
       padding-left: 150px;
+      .el-menu-item,.el-submenu__title{
+        border:none !important;
+      }
+      .is-active,.el-submenu__title{
+        /*border:none !important;*/
+        color: white !important;
+      }
     }
   }
 
@@ -276,6 +336,18 @@
     }
     .answerFriend:nth-of-type(1):hover {
       background: #40BEFF;
+    }
+  }
+  .el-menu--horizontal{
+    .el-menu{
+      .el-menu-item{
+        border:none !important;
+        color: white !important;
+      }
+      .is-active{
+        border:none !important;
+        color: white !important;
+      }
     }
   }
 </style>
