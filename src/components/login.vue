@@ -1,8 +1,8 @@
 <template>
   <div class="login">
     <!--<img src="../assets/imgages/loginbg2.jpg" alt="">-->
-    <div class="warp" :class="{registerWarp:isRegister}">
-      <div v-show="!isRegister" >
+    <div class="warp" :class="{registerWarp:wrapType===2,forgetWrap:wrapType===3}">
+      <div v-show="wrapType===1" >
         <div class="input-group">
           <label for="userId">账号:</label>
           <el-input v-model="userId" id="userId"></el-input>
@@ -14,16 +14,16 @@
         <div class="input-group clearfix">
           <input ref="remember" id="remember" class="fl" type="checkbox" @click="clickRemember"/>
           <label for="remember" class="fl">记住密码</label>
-          <a class="forget fr" href="javascript:;">忘记密码</a>
+          <a class="forget fr" href="javascript:;" @click="wrapType=3">忘记密码</a>
         </div>
         <div class="input-group">
           <el-button :disabled="isLoading" :loading="isLoading" type="primary" @click="login">登录</el-button>
         </div>
         <div class="input-group">
-          <el-button type="primary" @click="isRegister=true">注册</el-button>
+          <el-button type="primary" @click="wrapType=2">注册</el-button>
         </div>
       </div>
-      <div v-show="isRegister" class="register-warp">
+      <div v-show="wrapType===2" class="register-warp">
         <label for="ruserId">账号:</label>
         <el-input v-model="registerParams.userId" id="ruserId" @blur="checkuserId"></el-input>
         <div class="alerts">
@@ -51,7 +51,17 @@
         </div>
         <div class="button-group">
           <el-button type="primary" @click="register">注册</el-button>
-          <el-button type="primary" plain @click="isRegister=false">返回</el-button>
+          <el-button type="primary" plain @click="wrapType=1">返回</el-button>
+        </div>
+      </div>
+      <div v-show="wrapType===3" class="forget-warp">
+        <label>账号:</label>
+        <el-input v-model="forgetId" @blur="" placeholder="请输入账号"></el-input>
+        <label>邮箱:</label>
+        <el-input v-model="forgetEmail" @blur="" placeholder="请输入邮箱"></el-input>
+        <div class="button-group">
+          <el-button type="primary" :disabled="isForgetLoading" :loading="isForgetLoading" @click="getPassword">确定</el-button>
+          <el-button type="primary" plain @click="wrapType=1">返回</el-button>
         </div>
       </div>
     </div>
@@ -63,7 +73,10 @@
         name:'login',
         data: function () {
             return {
-              isRegister:false,
+              isForgetLoading:false,
+              forgetEmail:'',
+              forgetId:'',
+              wrapType:1,
               isLoading:false,
               userId:'',
               password:'',
@@ -97,6 +110,19 @@
           //this.$store.dispatch('connectSocket')
         },
       methods:{
+        getPassword(){
+          if(this.forgetId==''||this.forgetEmail==""){
+            this.$message.error('账号和邮箱不能为空');
+            return;
+          }
+          this.isForgetLoading=true;
+          this.$http.post('/getPassword.do',{forgetId:this.forgetId,email:this.forgetEmail}).then((res)=>{
+            if(res.data.success){
+              this.$message({message:'邮件发送成功,请查收',type:'success'});
+            }
+            this.isForgetLoading=false;
+          })
+        },
         checkEmail(){
           if(this.registerParams.email===''){
             this.tip.email=2;
@@ -155,19 +181,7 @@
             }
           });
           if(this.tip.userId!=3||this.tip.email!=0||this.tip.fPassword!=0||this.tip.sPassword!=0)return;
-          this.$http.get('/register.do',{
-            params:{
-              userId:this.registerParams.userId,
-              password:this.registerParams.fPassword,
-              email:this.registerParams.email
-            }
-          }).then(res=>{
-            if(res.data.success){
-              this.$message({message:'注册成功',type:'success'});
-              this.isRegister=false;
-            }
-          })
-          // this.$http.get('/sendRegEmail.do',{
+          // this.$http.get('/register.do',{
           //   params:{
           //     userId:this.registerParams.userId,
           //     password:this.registerParams.fPassword,
@@ -175,10 +189,22 @@
           //   }
           // }).then(res=>{
           //   if(res.data.success){
-          //     this.$message({message:'邮件发送成功',type:'success'});
-          //     this.isRegister=false;
+          //     this.$message({message:'注册成功',type:'success'});
+          //     this.wrapType=1;
           //   }
           // })
+          this.$http.get('/sendRegEmail.do',{
+            params:{
+              userId:this.registerParams.userId,
+              password:this.registerParams.fPassword,
+              email:this.registerParams.email
+            }
+          }).then(res=>{
+            if(res.data.success){
+              this.$message({message:'邮件发送成功,请去邮箱激活该账号',type:'success'});
+              // this.wrapType=1;
+            }
+          })
         },
         clickRemember(){
           localStorage.isRemember=this.$refs.remember.checked;
@@ -224,8 +250,8 @@
         }
       },
     watch:{
-      isRegister(val){
-        if(val){
+      wrapType(val){
+        if(val===2){
           this.tip={
             userId:0,
             fPassword:0,
@@ -238,10 +264,8 @@
             sPassword:"",
             email:""
           }
-        }else{
-          if(getCookie('isRemember')==='true') return;
-          this.userId='';
-          this.password='';
+        }else if(val===3){
+          this.forgetEmail=this.forgetId='';
         }
       }
     }
@@ -299,12 +323,25 @@
           }
         }
       }
+      .forget-warp{
+        .button-group{
+          margin-top: 10px;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .el-input{
+          margin-bottom: 10px;
+        }
+      }
     }
     .registerWarp{
       top:calc(~'50% - 200px')
     }
+    .forgetWrap{
+      top:calc(~'50% - 120px')
+    }
     input:-webkit-autofill {
-      -webkit-box-shadow: 0 0 0px 1000px white inset;
+      -webkit-box-shadow: 0 0 0 1000px white inset;
       border: 1px solid #CCC!important;
     }
   }

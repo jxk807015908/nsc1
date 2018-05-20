@@ -64,6 +64,7 @@ const readRemind=require('./myMessages/readRemind');
 const updateRemind=require('./myMessages/updateRemind');
 const sendRegEmail=require('./login/sendRegEmail');
 const emailReg=require('./login/emailReg');
+const getPassword=require('./login/getPassword');
 exports.handle=(app)=>{
   // const mysql=require('mysql');
   // const connection=mysql.createConnection({
@@ -126,5 +127,6 @@ exports.handle=(app)=>{
   updateRemind.updateRemind(app);
   sendRegEmail.sendRegEmail(app);
   emailReg.emailReg(app);
+  getPassword.getPassword(app);
 }
 

@@ -2,7 +2,7 @@ const databaseSettting = require('../databaseSetting');
 // const changeToTableKey = require('../changeToTableKey').changeToTableKey;
 exports.searchUser = (params, callback) => {
     let connection = databaseSettting.databaseSettting();
-    let sql='SELECT U_NickName,U_MessagePush FROM User WHERE';
+    let sql='SELECT * FROM User WHERE';
     let i=0;
     // Object.keys(params).forEach(key=>{
     //   if(changeToTableKey(key)){
@@ -32,6 +32,13 @@ exports.searchUser = (params, callback) => {
         sql+=' and';
       }
       sql+=` U_UserStateID="${params.status}"`;
+      i++;
+    };
+    if(params.email){
+      if(i!==0){
+        sql+=' and';
+      }
+      sql+=` U_Email="${params.email}"`;
       i++;
     };
     console.log(sql);

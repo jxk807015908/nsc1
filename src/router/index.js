@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import home from '@/components/home'
 import login from '@/components/login'
+import register from '@/components/register'
 import myFriend from '@/components/contacts/myFriend'
 import myGroups from '@/components/contacts/myGroups'
 import personal from '@/components/setting/personal'
@@ -21,6 +22,11 @@ export default new Router({
       path: '/login',
       name: 'login',
       component: login
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: register
     },
     {
       path: '/home',

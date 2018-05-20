@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const uuid = require('uuid');
+const os=require('os');
 const insertUserRegister=require("../../businessLayer/userRegister/insertUserRegister");
 exports.sendRegEmail = (app, connection) => {
   app.get('/sendRegEmail.do', (req, res) => {
@@ -30,50 +31,62 @@ exports.sendRegEmail = (app, connection) => {
           pass: 'mylfqetmrmvrdheg'
         }
       });
+
+      let iptable={};
+      let ifaces=os.networkInterfaces();
+      for (var dev in ifaces) {
+        ifaces[dev].forEach(function(details,alias){
+          if (details.family=='IPv4') {
+            iptable[dev+(alias?':'+alias:'')]=details.address;
+          }
+        });
+      }
+      let ip=iptable[Object.keys(iptable)[0]];
+      // console.log(iptable);
       let uid=uuid.v1();
-      let herf=`http://localhost/emailReg.do?uid=${uid}`;
-      let html=`<a herf="${herf}"></a>`;
+      let herf=`http://${ip}/#/register?uid=${uid}`;
+      let html=`<a href="${herf}">${herf}</a>`;
       let mailOptions = {
         from:    "'nsc' <2788926558@qq.com>",        //谁发送的
         to:      req.query.email,       //发送给谁的
         subject: 'nsc注册', // Subject line
-        text: html, // plain text body
-        html: html // html body
+        // text: 'html', // plain text body
+        html: '点击链接完成注册'+html // html body
       };
-      console.log('html:',mailOptions.html)
+      console.log('html:',mailOptions.html);
+      insertUserRegisterFn({
+        uid:uid,
+        registerId:req.query.userId,
+        // nickName:req.query.userId,
+        password:req.query.password,
+        email:req.query.email,
+        expiryDate:new Date().getTime()+60000
+      }).then(()=>{
+        (!isSend)&&res.send({
+          code: 10000,
+          data: null,
+          msg: '',
+          success: true
+        })
+      }).catch(()=>{
+        (!isSend)&&res.send({
+          code: 10000,
+          data: null,
+          msg: '发送邮件失败',
+          success: false
+        })
+      });
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.log(error);
-          (!isSend)&&res.send({
-            code: 10000,
-            data: null,
-            msg: '发送邮件失败',
-            success: false
-          })
-        }else{
-          insertUserRegisterFn({
-            uid:uid,
-            registerId:req.query.userId,
-            // nickName:req.query.userId,
-            password:req.query.password,
-            email:req.query.email,
-            expiryDate:new Date().getTime()+60000
-          }).then(()=>{
-            (!isSend)&&res.send({
-              code: 10000,
-              data: null,
-              msg: '',
-              success: true
-            })
-          }).catch(()=>{
-            (!isSend)&&res.send({
-              code: 10000,
-              data: null,
-              msg: '发送邮件失败',
-              success: false
-            })
-          })
+          // (!isSend)&&res.send({
+          //   code: 10000,
+          //   data: null,
+          //   msg: '发送邮件失败',
+          //   success: false
+          // })
         }
+
         // console.log('Message sent: %s', info.messageId);
         // console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 

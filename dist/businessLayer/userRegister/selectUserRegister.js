@@ -4,7 +4,7 @@ exports.selectUserRegister = (params, callback) => {
   let connection = databaseSettting.databaseSettting();
   let tableKey=[];
   Object.keys(params).forEach(key=>{
-    if(params[key]!==null&&changeUserRegisterKey(key)!==null&&key==='expiryDate'){
+    if(params[key]!==null&&changeUserRegisterKey(key)!==null&&key!=='expiryDate'){
       tableKey.push(`${changeUserRegisterKey(key)}='${params[key]}'`)
     }
   });

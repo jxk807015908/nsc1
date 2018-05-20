@@ -14,7 +14,7 @@
       <el-footer>
         <div class="inputField">
           <div class="input-menu">
-            <i class="fa fa-font" title="文字样式"></i>
+            <!--<i class="fa fa-font" title="文字样式"></i>-->
             <el-popover
               popper-class="express-popover"
               ref="express"
