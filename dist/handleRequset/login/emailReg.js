@@ -38,7 +38,7 @@ exports.emailReg = (app, connection) => {
               password: result[length - 1].UR_Password,
               email: result[length - 1].UR_Email
             }).then(() => {
-              insertNewGroupFn({groupName: '我的好友', userId: req.query.userId}).then(() => {
+              insertNewGroupFn({groupName: '我的好友', userId: result[length - 1].UR_RegisterId}).then(() => {
                 (!isSend) && res.send({
                   code: 10000,
                   data: null,

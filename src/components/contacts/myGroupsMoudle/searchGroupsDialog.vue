@@ -3,7 +3,7 @@
     <dialogs :dialogFlag.sync="dialogFlag" :openTitle="'搜索群'" :isDefaultBtn="false" @close="close" @open="open">
       <div slot="dialogContent">
         <div class="search">
-          <el-input placeholder="请输入群ID或名称" v-model="postParams" class="input-with-select">
+          <el-input :maxlength="20" placeholder="请输入群ID或名称" v-model="postParams" class="input-with-select">
             <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
           </el-input>
         </div>

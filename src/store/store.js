@@ -17,7 +17,9 @@ export default new Vuex.Store({
     pageSize:10,
     expressArr:[],
     remindTips:0,
-    messagePush:''
+    messagePush:'',
+    myFriendCheckedId:'',
+    myGroupCheckedId:''
   },
   mutations:{
 

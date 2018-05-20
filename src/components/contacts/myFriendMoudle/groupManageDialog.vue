@@ -33,6 +33,8 @@
         },
         methods:{
           deleteGroup(index){
+            // console.log(this.groupArr);
+            // console.log(this.groupArr[index]);
             this.$http.post('/deleteGroup.do',{groupId:this.groupArr[index].value}).then(res=>{
               if(res.data.success){
                 this.groupArr.splice(index,1);
@@ -45,15 +47,19 @@
               confirmButtonText: '确定',
               cancelButtonText: '取消',
             }).then(({ value }) => {
-              this.$http.post('/addGroup.do',{groupName:value,userId:this.$store.state.userId}).then(res=>{
-                if(res.data.success){
-                  this.groupArr.push({
-                    name:value,
-                    value:res.data.insertId
-                  });
-                  this.refresh();
-                }
-              })
+              if(value.length<=20){
+                this.$http.post('/addGroup.do',{groupName:value,userId:this.$store.state.userId}).then(res=>{
+                  if(res.data.success){
+                    this.groupArr.push({
+                      name:value,
+                      value:res.data.data.insertId
+                    });
+                    this.refresh();
+                  }
+                })
+              }else{
+               this.$message.error('请不要超过20字')
+              }
             })
           },
           refresh(){

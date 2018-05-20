@@ -1,7 +1,7 @@
 <template>
   <div :class="{aMessage:true,atRight:isAtRight}">
     <!--<img :class="{fl:!isAtRight,fr:isAtRight}" src="../../assets/imgages/userBaseHeadImg.png" alt="">-->
-    <headPortrait @imgClick="imgClick" :indexPath="data.senderId" :isSave="true" :class="{fl:!isAtRight,fr:isAtRight}" :userId="data.senderId"></headPortrait>
+    <headPortrait @imgClick="imgClick" :indexPath="data.senderId" :isSave="false" :class="{fl:!isAtRight,fr:isAtRight}" :userId="data.senderId"></headPortrait>
     <div class="content" :class="{fl:!isAtRight,fr:isAtRight}">
       <span id="name">{{name}}</span>
       <div v-if="data.messageType!==4" v-html="data.message"></div>

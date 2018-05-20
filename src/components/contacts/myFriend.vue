@@ -10,11 +10,11 @@
           <i class="fa fa-bars fr" @click="openGroupManageDialog"></i>
         </div>
         <div class="search-wrap">
-          <el-input placeholder="请输入好友账号或昵称进行搜索" v-model="searchParams" @focus="isFilterFriendShow=true" @blur="isFilterFriendShow=false"></el-input>
+          <el-input :maxlength="20" placeholder="请输入好友账号或昵称进行搜索" v-model="searchParams" @focus="isFilterFriendShow=true" @blur="isFilterFriendShow=false"></el-input>
           <ul class="filter-friend-wrap" :class="{hasFriend:filterFriend.length!==0,friendWrapHide:!isFilterFriendShow}">
             <li v-for="friend in filterFriend" @click="goTofriend(friend)">
               <headPortrait @imgClick="imgClick" :indexPath="friend.friendId" :isSave="true" :status="friend.status" :userId="friend.friendId" :hasDetail="true" :data="friend"></headPortrait>
-              <span :class="{lowColor:friend.status === 0,isActive:friend.friendId === curFriendId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
+              <span :class="{lowColor:friend.status === 0,isActive:friend.friendId === $store.state.myFriendCheckedId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
             </li>
           </ul>
         </div>
@@ -40,7 +40,7 @@
                   <!--</el-tooltip>-->
                   <!--<img src="../../assets/imgages/userBaseHeadImg.png" alt="">-->
                   <headPortrait @imgClick="imgClick" :indexPath="friend.friendId" :status="friend.status" :userId="friend.friendId" :hasDetail="true" :data="friend"></headPortrait>
-                  <span :class="{lowColor:friend.status === 0,isActive:friend.friendId === curFriendId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
+                  <span :class="{lowColor:friend.status === 0,isActive:friend.friendId === $store.state.myFriendCheckedId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
                   <div class="cascader" @click.stop="">
                     <el-cascader
                       :ref="'friendMenu'+index+'-'+index2"
@@ -58,14 +58,14 @@
       <!--<el-container>-->
         <!--<el-main ref="message" :class="{small:this.$store.state.isVideo}">-->
           <!--<div class="loading-wrap" v-show="isMessageLoading"><i class="el-icon-loading"></i></div>-->
-          <!--<div v-if="this.curFriendId!==''" class="messageField">-->
+          <!--<div v-if="this.$store.state.myFriendCheckedId!==''" class="messageField">-->
             <!--<p v-if="total !==0 && total <= messageRecord.length">没有记录了</p>-->
             <!--<aMessage @imgClick="imgClick" :key="index" v-for="(item,index) in messageRecord" :name="item.name" :isAtRight="item.isAtRight"-->
                       <!--:expressArr="expressArr" :data="item"></aMessage>-->
           <!--</div>-->
         <!--</el-main>-->
         <!--<el-footer>-->
-          <!--<div v-if="this.curFriendId!==''" class="inputField">-->
+          <!--<div v-if="this.$store.state.myFriendCheckedId!==''" class="inputField">-->
             <!--<div class="input-menu">-->
               <!--<i class="fa fa-font" title="文字样式"></i>-->
               <!--<el-popover-->
@@ -83,7 +83,7 @@
               <!--<span class="upload-wrap" title="发送图片或视频">-->
                 <!--<el-upload-->
                   <!--ref="uploadPic"-->
-                  <!--:action='`/uploadPicture.do?userId=${$store.state.userId}&&friendId=${curFriendId}`'-->
+                  <!--:action='`/uploadPicture.do?userId=${$store.state.userId}&&friendId=${$store.state.myFriendCheckedId}`'-->
                   <!--:on-success="picUpdateSuccess"-->
                   <!--:before-upload="beforePicUpload"-->
                   <!--:limit="1">-->
@@ -94,7 +94,7 @@
               <!--<span class="upload-wrap" title="发送文件">-->
                 <!--<el-upload-->
                   <!--ref="uploadFile"-->
-                  <!--:action='`/uploadFile.do?userId=${$store.state.userId}&&friendId=${curFriendId}`'-->
+                  <!--:action='`/uploadFile.do?userId=${$store.state.userId}&&friendId=${$store.state.myFriendCheckedId}`'-->
                   <!--:on-success="fileUpdateSuccess"-->
                   <!--:before-upload="beforeFileUpload"-->
                   <!--:limit="1">-->
@@ -109,7 +109,7 @@
           <!--</div>-->
         <!--</el-footer>-->
       <!--</el-container>-->
-      <chatWindow v-if="curFriendId!==''" :chatId="curFriendId" :chatType="1" :detailData="curFriend"></chatWindow>
+      <chatWindow v-if="$store.state.myFriendCheckedId!==''" :chatId="$store.state.myFriendCheckedId" :chatType="1"></chatWindow>
     </el-container>
   </div>
 </template>
@@ -132,7 +132,7 @@
         // isMessageLoading: false,
         // pageNo: 1,
         // total: 0,
-        curFriend: {},
+        // curFriend: {},
         selectedOptions: [],
         options: [{
           label: '修改备注',
@@ -150,7 +150,7 @@
         groupFlag: false,
         friendGroup: [],
         // message: '',
-        curGroupId: '',
+        // curGroupId: '',
         curFriendId: '',
         // messageRecord: [],
         expressArr: [],
@@ -162,6 +162,9 @@
       };
     },
     computed: {
+      // curFriend(){
+      //   return this.friendList.filter(obj => obj.friendId === this.$store.state.myFriendCheckedId)[0];
+      // },
       socket() {
         return this.$store.state.socket;
       },
@@ -176,14 +179,14 @@
     },
     mounted() {
       // if (this.$route.params.friendId !== undefined) {
-      //   this.curFriendId = this.$route.params.friendId;
+      //   this.$store.state.myFriendCheckedId = this.$route.params.friendId;
       // }
       (async () => {
         await this.getFriendGroup();
         await this.getFriend();
         if (this.$route.params.friendId !== undefined) {
-          this.curFriendId = this.$route.params.friendId;
-          let belongGroup=this.friendGroup.filter(obj=>obj.content.some(obj2=>obj2.friendId===this.curFriendId))[0];
+          this.$store.state.myFriendCheckedId = this.$route.params.friendId;
+          let belongGroup=this.friendGroup.filter(obj=>obj.content.some(obj2=>obj2.friendId===this.$store.state.myFriendCheckedId))[0];
           this.$refs.friendMenu.open(belongGroup.value);
           this.select(this.$route.params.friendId,[belongGroup.value,this.$route.params.friendId]);
         }
@@ -195,8 +198,8 @@
         await this.getFriendGroup();
         await this.getFriend();
         if (this.$route.params.friendId !== undefined) {
-          this.curFriendId = this.$route.params.friendId;
-          let belongGroup=this.friendGroup.filter(obj=>obj.content.some(obj2=>obj2.friendId===this.curFriendId))[0];
+          this.$store.state.myFriendCheckedId = this.$route.params.friendId;
+          let belongGroup=this.friendGroup.filter(obj=>obj.content.some(obj2=>obj2.friendId===this.$store.state.myFriendCheckedId))[0];
           this.$refs.friendMenu.open(belongGroup.value);
           this.select(this.$route.params.friendId,[belongGroup.value,this.$route.params.friendId]);
         }
@@ -301,10 +304,10 @@
       //   });
       // },
       // videoRequest() {
-      //   let friendName = this.friendGroup.filter(obj => obj.value == this.curGroupId)[0].content.filter(obj => obj.friendId == this.curFriendId)[0]
+      //   let friendName = this.friendGroup.filter(obj => obj.value == this.curGroupId)[0].content.filter(obj => obj.friendId == this.$store.state.myFriendCheckedId)[0]
       //   this.socket.emit('videoRequest', {
       //     to: {
-      //       id: this.curFriendId,
+      //       id: this.$store.state.myFriendCheckedId,
       //       name: friendName.remark || friendName.nickName || friendName.friendId
       //     },
       //     from: {
@@ -321,10 +324,14 @@
             confirmButtonText: '确定',
             cancelButtonText: '取消',
           }).then(({value}) => {
-            (async () => {
-              await this.reviseRemark(this.friendGroup[index].content[index2].friendId, value);
-              this.getFriend();
-            })()
+            if(value.length<=20){
+              (async () => {
+                await this.reviseRemark(this.friendGroup[index].content[index2].friendId, value);
+                this.getFriend();
+              })()
+            }else{
+             this.$message.error('请不要超过20字');
+            }
           })
         } else if (this.selectedOptions[0] === '2') {
           (async () => {
@@ -334,6 +341,7 @@
         } else {
           (async () => {
             await this.deleteFriend(this.friendGroup[index].content[index2].friendId);
+            this.$store.state.myFriendCheckedId===this.friendGroup[index].content[index2].friendId&&(this.$store.state.myFriendCheckedId='');
             this.getFriend();
           })()
         }
@@ -381,7 +389,7 @@
             friendId: friendId
           }).then(res => {
             if (res.data.success) {
-              this.$message({message: '删除成功', type: 'success'})
+              this.$message({message: '删除成功', type: 'success'});
               resolve()
             }
           })
@@ -441,7 +449,7 @@
       //       messageType: 1,
       //       message: this.message,
       //       from: sessionStorage.getItem('userId'),
-      //       to: this.curFriendId
+      //       to: this.$store.state.myFriendCheckedId
       //     };
       //     let matchResult = this.message.match(/\{[0-9a-zA-Z]+(\-\g+){0,1}\}/ig);
       //     matchResult && matchResult.forEach((str, index) => {
@@ -488,7 +496,7 @@
       //           isAtRight: true
       //         });
       //         // this.messageRecord.push({
-      //         //   senderId:this.curFriendId,
+      //         //   senderId:this.$store.state.myFriendCheckedId,
       //         //   name:this.$store.state.nickName||this.$store.state.userId,
       //         //   message:translateExpress(1,this.message,this.expressArr.filter(obj=>getExpressName(this.message).includes(obj.name))),
       //         //   isAtRight:true
@@ -499,26 +507,26 @@
       //         this.$store.state.socket.emit('remandFriend', {
       //           message: translateExpress(2, this.message, this.expressArr.filter(name => getExpressName(this.message).includes(name.split('.')[0])), this.$store.state.statisFileIp),
       //           from: sessionStorage.getItem('userId'),
-      //           to: this.curFriendId,
+      //           to: this.$store.state.myFriendCheckedId,
       //           friendName: this.curFriend.nickName,
       //           messageType: params.messageType
       //         });
-      //         // this.$store.state.socket.emit('remandFriend',{message:translateExpress(this.message,this.expressArr.filter(obj=>getExpressName(this.message).includes(obj.name))),from:sessionStorage.getItem('userId'),to:this.curFriendId});
+      //         // this.$store.state.socket.emit('remandFriend',{message:translateExpress(this.message,this.expressArr.filter(obj=>getExpressName(this.message).includes(obj.name))),from:sessionStorage.getItem('userId'),to:this.$store.state.myFriendCheckedId});
       //         this.message = '';
       //       }
       //     });
       //   }
       // },
       select(index, indexPath) {
-        // console.log(this.curFriendId);
-        if (this.curFriendId == index) return;
-        this.curFriendId = index;
-        this.messageRecord = [];
-        this.pageNo = 1;
-        this.total = 0;
-        this.openTime = new Date().getTime();
-        this.curFriend = this.friendList.filter(obj => obj.friendId === this.curFriendId)[0];
-        this.curGroupId = indexPath[0];
+        // console.log(this.$store.state.myFriendCheckedId);
+        if (this.$store.state.myFriendCheckedId == index) return;
+        this.$store.state.myFriendCheckedId = index;
+        // this.messageRecord = [];
+        // this.pageNo = 1;
+        // this.total = 0;
+        // this.openTime = new Date().getTime();
+        // this.curFriend = this.friendList.filter(obj => obj.friendId === this.$store.state.myFriendCheckedId)[0];
+        // this.curGroupId = indexPath[0];
         // this.curFriendDetailData=this.curFriend;
         // console.log(this.curFriend)
         // this.getFriendMessage().then(()=>{
@@ -536,15 +544,15 @@
       //       pageNo: this.pageNo,
       //       pageSize: this.$store.state.pageSize,
       //       userId: sessionStorage.getItem('userId'),
-      //       friendId: this.curFriendId
+      //       friendId: this.$store.state.myFriendCheckedId
       //     }).then(res => {
       //       if (res.data.success) {
       //         this.total = res.data.total;
       //         res.data.data.length !== 0 && res.data.data.forEach(obj => {
       //           let friendName;
       //           let newMessage = obj.M_PostMessages;
-      //           if (obj.M_FromUserID === this.curFriendId) {
-      //             friendName = this.friendGroup.filter(obj => obj.value == this.curGroupId)[0].content.filter(obj => obj.friendId == this.curFriendId)[0]
+      //           if (obj.M_FromUserID === this.$store.state.myFriendCheckedId) {
+      //             friendName = this.friendGroup.filter(obj => obj.value == this.curGroupId)[0].content.filter(obj => obj.friendId == this.$store.state.myFriendCheckedId)[0]
       //           }
       //           if ([3, 4].includes(obj.M_MessageTypeID)) {
       //             let pathArr = obj.M_FilePath.split('.');
@@ -553,8 +561,8 @@
       //               this.messageRecord.unshift({
       //                 message: `<video src="http://${this.$store.state.statisFileIp + obj.M_FilePath}" loop controls></video>`,
       //                 senderId: obj.M_FromUserID,
-      //                 name: obj.M_FromUserID !== this.curFriendId ? (this.$store.state.nickName || this.$store.state.userId) : (friendName.remark || friendName.nickName || friendName.friendId),
-      //                 isAtRight: obj.M_FromUserID !== this.curFriendId,
+      //                 name: obj.M_FromUserID !== this.$store.state.myFriendCheckedId ? (this.$store.state.nickName || this.$store.state.userId) : (friendName.remark || friendName.nickName || friendName.friendId),
+      //                 isAtRight: obj.M_FromUserID !== this.$store.state.myFriendCheckedId,
       //                 messageType: obj.M_MessageTypeID,
       //                 filePath: obj.M_FilePath
       //               });
@@ -562,8 +570,8 @@
       //               this.messageRecord.unshift({
       //                 message: `<img src='http://${this.$store.state.statisFileIp + obj.M_FilePath}'></img>`,
       //                 senderId: obj.M_FromUserID,
-      //                 name: obj.M_FromUserID !== this.curFriendId ? (this.$store.state.nickName || this.$store.state.userId) : (friendName.remark || friendName.nickName || friendName.friendId),
-      //                 isAtRight: obj.M_FromUserID !== this.curFriendId,
+      //                 name: obj.M_FromUserID !== this.$store.state.myFriendCheckedId ? (this.$store.state.nickName || this.$store.state.userId) : (friendName.remark || friendName.nickName || friendName.friendId),
+      //                 isAtRight: obj.M_FromUserID !== this.$store.state.myFriendCheckedId,
       //                 messageType: obj.M_MessageTypeID,
       //                 filePath: obj.M_FilePath
       //               });
@@ -573,8 +581,8 @@
       //               this.messageRecord.unshift({
       //                 message: obj.M_PostMessages,
       //                 senderId: obj.M_FromUserID,
-      //                 name: obj.M_FromUserID !== this.curFriendId ? (this.$store.state.nickName || this.$store.state.userId) : (friendName.remark || friendName.nickName || friendName.friendId),
-      //                 isAtRight: obj.M_FromUserID !== this.curFriendId,
+      //                 name: obj.M_FromUserID !== this.$store.state.myFriendCheckedId ? (this.$store.state.nickName || this.$store.state.userId) : (friendName.remark || friendName.nickName || friendName.friendId),
+      //                 isAtRight: obj.M_FromUserID !== this.$store.state.myFriendCheckedId,
       //                 messageType: obj.M_MessageTypeID,
       //                 filePath: obj.M_FilePath
       //               });
@@ -590,9 +598,9 @@
       //             }
       //             this.messageRecord.unshift({
       //               senderId: obj.M_FromUserID,
-      //               name: obj.M_FromUserID !== this.curFriendId ? (this.$store.state.nickName || this.$store.state.userId) : (friendName.remark || friendName.nickName || friendName.friendId),
+      //               name: obj.M_FromUserID !== this.$store.state.myFriendCheckedId ? (this.$store.state.nickName || this.$store.state.userId) : (friendName.remark || friendName.nickName || friendName.friendId),
       //               message: newMessage,
-      //               isAtRight: obj.M_FromUserID !== this.curFriendId,
+      //               isAtRight: obj.M_FromUserID !== this.$store.state.myFriendCheckedId,
       //               messageType: obj.M_MessageTypeID,
       //               filePath: obj.M_FilePath
       //             })
@@ -713,7 +721,7 @@
       }
     },
     watch: {
-      // curFriendId(val){
+      // $store.state.myFriendCheckedId(val){
       //   if(val !== ''){
       //     onToTop(this.$refs.message.$el,()=>{
       //       // console.log(Math.ceil(this.total/this.$store.state.pageSize));
@@ -754,14 +762,14 @@
       //         let button=document.getElementsByClassName(`${item.from}Button${time}`);
       //         button[0].onclick=()=>{
       //           notify.close();
-      //           this.curFriendId = item.from;
+      //           this.$store.state.myFriendCheckedId = item.from;
       //           let belongGroup=this.friendGroup.filter(obj=>obj.content.some(obj2=>obj2.friendId===item.from))[0];
       //           this.$refs.friendMenu.open(belongGroup.value);
       //           this.select(item.from,[belongGroup.value,item.from]);
       //           this.$router.push({name:'myFriend'});
       //         };
-      //         // if (item.from === this.curFriendId) {
-      //         //   let friendName = this.friendGroup.filter(obj => obj.value == this.curGroupId)[0].content.filter(obj => obj.friendId == this.curFriendId)[0];
+      //         // if (item.from === this.$store.state.myFriendCheckedId) {
+      //         //   let friendName = this.friendGroup.filter(obj => obj.value == this.curGroupId)[0].content.filter(obj => obj.friendId == this.$store.state.myFriendCheckedId)[0];
       //         //   this.messageRecord.push({
       //         //     senderId: item.from,
       //         //     name: friendName.remark || friendName.nickName || friendName.friendId,
@@ -922,6 +930,9 @@
                   color: rgb(255, 208, 75);
                 }
               }
+            }
+            .is-active{
+              color: white !important;
             }
           }
         }

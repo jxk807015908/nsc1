@@ -21,11 +21,11 @@
         </div>
         <div class="input-group">
           <el-row>
-            <el-input v-model="groupId" placeholder="请写群ID" @blur="checkGroupId"></el-input>
+            <el-input :maxlength="20" v-model="groupId" placeholder="请写群ID" @blur="checkGroupId"></el-input>
             <span :class="{groupTip:true,isError:[1,3].includes(groupIdTip)}">{{translateGroupIdTip(groupIdTip)}}</span>
           </el-row>
           <el-row>
-            <el-input v-model="groupName" placeholder="请写群名称" @blur="checkGroupName"></el-input>
+            <el-input :maxlength="20" v-model="groupName" placeholder="请写群名称" @blur="checkGroupName"></el-input>
             <span :class="{groupTip:true,isError:[1,3].includes(groupNameTip)}">{{translateGroupIdTip(groupNameTip)}}</span>
           </el-row>
           <el-row>

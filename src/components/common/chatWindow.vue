@@ -1,5 +1,5 @@
 <template>
-  <div class="chatWindow" v-if="isShow">
+  <div class="chatWindow" v-if="isShow&&detailData!==''">
     <friendDetailDialog :dialogFlag.sync="friendDetailFlag" :openData="friendDetailData"></friendDetailDialog>
     <el-container>
       <el-main ref="message" :class="{small:this.$store.state.isVideo}">
@@ -66,9 +66,10 @@
 
   export default {
     name: "chatWindow",
-    props: ['chatType', 'chatId', 'detailData'],
+    props: ['chatType', 'chatId'],
     data: function () {
       return {
+        detailData:'',
         // detailData:null,
         friendDetailFlag: false,
         isMessageLoading: false,
@@ -95,7 +96,7 @@
         if (this.chatType === 1) {
           return `/uploadPicture.do?userId=${this.$store.state.userId}&&friendId=${this.chatId}`;
         } else {
-          if(this.detailData.members.some(obj => obj.memberId === this.$store.state.userId)){
+          if(this.detailData&&this.detailData.members.some(obj => obj.memberId === this.$store.state.userId)){
             return `/uploadGroupPicture.do?userId=${this.$store.state.userId}&&groupId=${this.chatId}&&uName=${this.detailData.members.filter(obj => obj.memberId === this.$store.state.userId)[0].groupNick || this.$store.state.nickName || this.$store.state.userId}`
           }else{
             return ''
@@ -106,7 +107,7 @@
         if (this.chatType === 1) {
           return `/uploadFile.do?userId=${this.$store.state.userId}&&friendId=${this.chatId}`;
         } else {
-          if(this.detailData.members.some(obj => obj.memberId === this.$store.state.userId)){
+          if(this.detailData&&this.detailData.members.some(obj => obj.memberId === this.$store.state.userId)){
             return `/uploadGroupFile.do?userId=${this.$store.state.userId}&&groupId=${this.chatId}&&uName=${this.detailData.members.filter(obj => obj.memberId === this.$store.state.userId)[0].groupNick || this.$store.state.nickName || this.$store.state.userId}`
           }else{
             return ''
@@ -129,11 +130,57 @@
           }
         })
       },
+      getGroupDetailData(groupId) {
+        return this.$http.post('/getGroupDetailData.do', {groupId: groupId})
+      },
+      getGroupMembers(groupId) {
+        return this.$http.post('/getGroupMembers.do', {groupId: groupId})
+      },
       getDetailData(){
-        let path;
-        if(this.chatType===1){
-          path='/get'
-        }
+        return new Promise(resolve => {
+          if(this.chatType===1){
+            this.$http.post('/getFriendInfo.do', {userId: this.$store.state.userId,friendId:this.chatId}).then(res => {
+              if (res.data.success) {
+                res.data.data.forEach((obj) => {
+                  this.detailData={
+                    remark: obj.F_Name,
+                    nickName: obj.U_NickName,
+                    friendId: obj.F_FriendID,
+                    status: obj.U_UserStateID,
+                    friendGroupsId: obj.F_FriendGroupsID
+                  };
+                });
+                resolve();
+              }
+            })
+          }else{
+            Promise.all([this.getGroupDetailData(this.chatId), this.getGroupMembers(this.chatId)]).then(result => {
+              // console.log(result);
+              if (result[0].data.success && result[1].data.success) {
+                this.detailData = {
+                  groupId: result[0].data.data[0].UG_ID,
+                  groupName: result[0].data.data[0].UG_Name,
+                  groupIntro: result[0].data.data[0].UG_Intro,
+                  groupNotice: result[0].data.data[0].UG_Notice,
+                  icon: result[0].data.data[0].UG_Icon,
+                  createTime: result[0].data.data[0].UG_CreateTime,
+                  adminId: result[0].data.data[0].UG_AdminID,
+                  members: []
+                };
+                result[1].data.data.forEach(obj => {
+                  this.detailData.members.push({
+                    groupNick: obj.UGU_GroupNick,
+                    memberId: obj.UGU_UserID,
+                    joinTime: obj.UGU_CreateTime,
+                    authority: obj.UGU_Authority
+                  })
+                });
+                resolve();
+              }
+            })
+          }
+        });
+
       },
       //用户头像点击，获得用户信息
       imgClick(userId) {
@@ -387,30 +434,33 @@
       init() {
         this.isDestroyed=false;
         this.messageRecord = [];
+        this.detailData='';
         this.pageNo = 1;
         this.total = 0;
         this.isShow = true;
         this.openTime = new Date().getTime();
-        if (this.chatType === 1) {
-          this.getFriendMessage().then(() => {
-            this.$nextTick(() => {
-              if(this.isShow){
-                this.toTopEvent();
-                toBottom(this.$refs.message.$el);
-              }
-            });
-          })
-        } else {
-          this.getGroupMessage().then(() => {
-            this.$nextTick(() => {
-              if(this.isShow){
-                this.toTopEvent();
-                toBottom(this.$refs.message.$el);
-              }
-            });
-          })
-        }
-        this.listenMessage();
+        this.getDetailData().then(()=>{
+          if (this.chatType === 1) {
+            this.getFriendMessage().then(() => {
+              this.$nextTick(() => {
+                if(this.isShow){
+                  this.toTopEvent();
+                  toBottom(this.$refs.message.$el);
+                }
+              });
+            })
+          } else {
+            this.getGroupMessage().then(() => {
+              this.$nextTick(() => {
+                if(this.isShow){
+                  this.toTopEvent();
+                  toBottom(this.$refs.message.$el);
+                }
+              });
+            })
+          }
+          this.listenMessage();
+        });
       },
       getFriendMessage() {
         return new Promise((resolve) => {

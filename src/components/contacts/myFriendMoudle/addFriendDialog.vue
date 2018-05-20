@@ -3,7 +3,7 @@
     <dialogs :dialogFlag.sync="dialogFlag" :openTitle="'添加好友'" :isDefaultBtn="false" @close="close" @open="open">
       <div slot="dialogContent">
         <div class="search">
-          <el-input placeholder="请输入对方账号或昵称" v-model="postParams" class="input-with-select">
+          <el-input :maxlength="20" placeholder="请输入对方账号或昵称" v-model="postParams" class="input-with-select">
             <el-button slot="append" icon="el-icon-search" @click="search"></el-button>
           </el-input>
         </div>
@@ -79,6 +79,8 @@
           }).then(({value}) => {
             if (['', null].includes(value)) {
               this.$message.error('输入不能为空')
+            }else if(value.length>20){
+              this.$message.error('输入不能超过20字')
             } else {
               if (this.searchList[index].friendPolicyType === 1) {
                 params.friendPolicyPassword = value

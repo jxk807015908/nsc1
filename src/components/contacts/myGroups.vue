@@ -11,7 +11,7 @@
           <i class="el-icon-plus fr" @click="searchGroupsFlag=true"></i>
         </div>
         <div class="search-wrap">
-          <el-input placeholder="请输入群ID或群名进行搜索" v-model="searchParams" @focus="isFilterGroupShow=true"
+          <el-input :maxlength="20" placeholder="请输入群ID或群名进行搜索" v-model="searchParams" @focus="isFilterGroupShow=true"
                     @blur="isFilterGroupShow=false"></el-input>
           <ul :class="{groupWrapHide:!isFilterGroupShow}">
             <li v-for="group in filterGroup" @click="goToGroup(group)">
@@ -56,7 +56,7 @@
                 <div>
                   <headPortrait :class="`group${group.groupId}`" :imgUrl="group.groupIcon" @imgClick="imgClick"
                                 :indexPath="group.groupId"></headPortrait>
-                  <span :class="{isActive:group.groupId === curGroupId}">{{group.groupName}}</span>
+                  <span :class="{isActive:group.groupId === $store.state.myGroupCheckedId}">{{group.groupName}}</span>
                   <!--<div class="cascader" @click.stop="">-->
                   <!--<el-cascader-->
                   <!--:ref="'group'+index"-->
@@ -74,7 +74,7 @@
                 <div>
                   <headPortrait :class="`group${group.groupId}`" :imgUrl="group.groupIcon" @imgClick="imgClick"
                                 :indexPath="group.groupId"></headPortrait>
-                  <span :class="{isActive:group.groupId === curGroupId}">{{group.groupName}}</span>
+                  <span :class="{isActive:group.groupId === $store.state.myGroupCheckedId}">{{group.groupName}}</span>
                   <!--<div class="cascader" @click.stop="">-->
                   <!--<el-cascader-->
                   <!--:ref="'group'+index"-->
@@ -89,11 +89,11 @@
           </el-menu>
         </div>
       </el-aside>
-      <chatWindow v-if="curGroupId!==''" :chatId="curGroupId" :chatType="2" :detailData="curGroupDetailData"></chatWindow>
+      <chatWindow v-if="$store.state.myGroupCheckedId!==''" :chatId="$store.state.myGroupCheckedId" :chatType="2"></chatWindow>
       <!--<el-container>-->
         <!--<el-main ref="message" :class="{small:$store.state.isVideo}">-->
           <!--<div class="loading-wrap" v-show="isMessageLoading"><i class="el-icon-loading"></i></div>-->
-          <!--<div v-if="curGroupId!==''" class="messageField">-->
+          <!--<div v-if="$store.state.myGroupCheckedId!==''" class="messageField">-->
             <!--<p v-if="total !==0 && total <= messageRecord.length">没有记录了</p>-->
             <!--<aMessage @imgClick="openFriendDetail" v-for="(item,index) in messageRecord" :key="index" :name="item.name"-->
                       <!--:isAtRight="item.isAtRight"-->
@@ -101,7 +101,7 @@
           <!--</div>-->
         <!--</el-main>-->
         <!--<el-footer>-->
-          <!--<div v-if="curGroupId!==''" class="inputField">-->
+          <!--<div v-if="$store.state.myGroupCheckedId!==''" class="inputField">-->
             <!--<div class="input-menu">-->
               <!--<i class="fa fa-font" title="文字样式"></i>-->
               <!--<el-popover-->
@@ -118,7 +118,7 @@
               <!--<span class="upload-wrap" title="发送图片或视频">-->
                 <!--<el-upload-->
                   <!--ref="uploadPic"-->
-                  <!--:action='`/uploadGroupPicture.do?userId=${$store.state.userId}&&groupId=${curGroupId}&&uName=${curGroupDetailData.members.filter(obj=>obj.memberId===$store.state.userId)[0].groupNick||$store.state.nickName||$store.state.userId}`'-->
+                  <!--:action='`/uploadGroupPicture.do?userId=${$store.state.userId}&&groupId=${$store.state.myGroupCheckedId}&&uName=${curGroupDetailData.members.filter(obj=>obj.memberId===$store.state.userId)[0].groupNick||$store.state.nickName||$store.state.userId}`'-->
                   <!--:on-success="picUpdateSuccess"-->
                   <!--:before-upload="beforePicUpload"-->
                   <!--:limit="1">-->
@@ -128,7 +128,7 @@
               <!--<span class="upload-wrap" title="发送文件">-->
                 <!--<el-upload-->
                   <!--ref="uploadFile"-->
-                  <!--:action='`/uploadGroupFile.do?userId=${$store.state.userId}&&groupId=${curGroupId}&&uName=${curGroupDetailData.members.filter(obj=>obj.memberId===$store.state.userId)[0].groupNick||$store.state.nickName||$store.state.userId}`'-->
+                  <!--:action='`/uploadGroupFile.do?userId=${$store.state.userId}&&groupId=${$store.state.myGroupCheckedId}&&uName=${curGroupDetailData.members.filter(obj=>obj.memberId===$store.state.userId)[0].groupNick||$store.state.nickName||$store.state.userId}`'-->
                   <!--:on-success="fileUpdateSuccess"-->
                   <!--:before-upload="beforeFileUpload"-->
                   <!--:limit="1">-->
@@ -193,7 +193,7 @@
         createGroupFlag: false,
         groupDetailFlag: false,
         groupDetailData: {},
-        curGroupDetailData: {},
+        // curGroupDetailData: {},
         friendDetailFlag: false,
         friendDetailData: {},
         isSocketListen:false
@@ -213,10 +213,10 @@
       },
       curGroup() {
         // return {};
-        if (this.curGroupId === '' || (this.groupsList.createGroup.length === 0 && this.groupsList.joinGroup.length === 0)) {
+        if (this.$store.state.myGroupCheckedId === '' || (this.groupsList.createGroup.length === 0 && this.groupsList.joinGroup.length === 0)) {
           return {}
         } else {
-          return this.groupsList.createGroup.filter(obj => obj.groupId === this.curGroupId)[0] || this.groupsList.joinGroup.filter(obj => obj.groupId === this.curGroupId)[0];
+          return this.groupsList.createGroup.filter(obj => obj.groupId === this.$store.state.myGroupCheckedId)[0] || this.groupsList.joinGroup.filter(obj => obj.groupId === this.$store.state.myGroupCheckedId)[0];
         }
       },
       socket() {
@@ -226,9 +226,9 @@
     mounted() {
       this.getAllGroups().then(() => {
         if (this.$route.params.groupId !== undefined) {
-          // this.curGroupId = this.$route.params.groupId;
-          // this.curGroup = this.groupsList.createGroup.filter(obj=>obj.groupId === this.curGroupId)[0] ||this.groupsList.joinGroup.filter(obj=>obj.groupId === this.curGroupId)[0];
-          // console.log(this.curGroupId);
+          // this.$store.state.myGroupCheckedId = this.$route.params.groupId;
+          // this.curGroup = this.groupsList.createGroup.filter(obj=>obj.groupId === this.$store.state.myGroupCheckedId)[0] ||this.groupsList.joinGroup.filter(obj=>obj.groupId === this.$store.state.myGroupCheckedId)[0];
+          // console.log(this.$store.state.myGroupCheckedId);
           // console.log(this.groupsList);
           let isCreated = this.groupsList.createGroup.some(obj => obj.groupId === this.$route.params.groupId);
           this.$refs.groupMenu.open(isCreated ? '0' : '1');
@@ -240,9 +240,9 @@
     activated() {
       this.getAllGroups().then(() => {
         if (this.$route.params.groupId !== undefined) {
-          // this.curGroupId = this.$route.params.groupId;
-          // this.curGroup = this.groupsList.createGroup.filter(obj=>obj.groupId === this.curGroupId)[0] ||this.groupsList.joinGroup.filter(obj=>obj.groupId === this.curGroupId)[0];
-          // console.log(this.curGroupId);
+          // this.$store.state.myGroupCheckedId = this.$route.params.groupId;
+          // this.curGroup = this.groupsList.createGroup.filter(obj=>obj.groupId === this.$store.state.myGroupCheckedId)[0] ||this.groupsList.joinGroup.filter(obj=>obj.groupId === this.$store.state.myGroupCheckedId)[0];
+          // console.log(this.$store.state.myGroupCheckedId);
           // console.log(this.groupsList);
           let isCreated = this.groupsList.createGroup.some(obj => obj.groupId === this.$route.params.groupId);
           this.$refs.groupMenu.open(isCreated ? '0' : '1');
@@ -273,12 +273,12 @@
         this.select(group.groupId, [group.groupAdminId === this.$store.state.userId ? '0' : '1', group.groupId]);
         this.searchParams = '';
       },
-      getGroupDetailData(groupId) {
-        return this.$http.post('/getGroupDetailData.do', {groupId: groupId})
-      },
-      getGroupMembers(groupId) {
-        return this.$http.post('/getGroupMembers.do', {groupId: groupId})
-      },
+      // getGroupDetailData(groupId) {
+      //   return this.$http.post('/getGroupDetailData.do', {groupId: groupId})
+      // },
+      // getGroupMembers(groupId) {
+      //   return this.$http.post('/getGroupMembers.do', {groupId: groupId})
+      // },
       imgClick(indexPath) {
         // let group=indexPath[0]==='0'?this.groupsList.createGroup.filter(obj=>obj.groupId===indexPath[1])[0]:this.groupsList.joinGroup.filter(obj=>obj.groupId===indexPath[1])[0];
         // let group=indexPath[0]==='0'?this.groupsList.createGroup[indexPath[1]]:this.groupsList.joinGroup[indexPath[1]];
@@ -316,7 +316,7 @@
       //       openTime: this.openTime,
       //       pageNo: this.pageNo,
       //       pageSize: this.$store.state.pageSize,
-      //       groupId: this.curGroupId
+      //       groupId: this.$store.state.myGroupCheckedId
       //     }).then(res => {
       //       if (res.data.success) {
       //         this.total = res.data.total;
@@ -384,41 +384,42 @@
       //   });
       // },
       select(index, indexPath) {
-        if (this.curGroupId === index) return;
-        this.messageRecord = [];
-        this.pageNo = 1;
-        this.total = 0;
-        this.openTime = new Date().getTime();
-        Promise.all([this.getGroupDetailData(index), this.getGroupMembers(index)]).then(result => {
-          // console.log(result);
-          if (result[0].data.success && result[1].data.success) {
-            this.curGroupDetailData = {
-              groupId: result[0].data.data[0].UG_ID,
-              groupName: result[0].data.data[0].UG_Name,
-              groupIntro: result[0].data.data[0].UG_Intro,
-              groupNotice: result[0].data.data[0].UG_Notice,
-              icon: result[0].data.data[0].UG_Icon,
-              createTime: result[0].data.data[0].UG_CreateTime,
-              adminId: result[0].data.data[0].UG_AdminID,
-              members: []
-            };
-            result[1].data.data.forEach(obj => {
-              this.curGroupDetailData.members.push({
-                groupNick: obj.UGU_GroupNick,
-                memberId: obj.UGU_UserID,
-                joinTime: obj.UGU_CreateTime,
-                authority: obj.UGU_Authority
-              })
-            });
-            this.curGroupId = index;
-            // this.curGroup=this.groupsList.createGroup.filter(obj=>obj.groupId === this.curGroupId)[0] ||this.groupsList.joinGroup.filter(obj=>obj.groupId === this.curGroupId)[0];
-            // this.getGroupMessage(index, indexPath).then(() => {
-            //   this.$nextTick(() => {
-            //     toBottom(this.$refs.message.$el);
-            //   });
-            // })
-          }
-        })
+        if (this.$store.state.myGroupCheckedId === index) return;
+        // this.messageRecord = [];
+        // this.pageNo = 1;
+        // this.total = 0;
+        // this.openTime = new Date().getTime();
+        // Promise.all([this.getGroupDetailData(index), this.getGroupMembers(index)]).then(result => {
+        //   // console.log(result);
+        //   if (result[0].data.success && result[1].data.success) {
+        //     this.curGroupDetailData = {
+        //       groupId: result[0].data.data[0].UG_ID,
+        //       groupName: result[0].data.data[0].UG_Name,
+        //       groupIntro: result[0].data.data[0].UG_Intro,
+        //       groupNotice: result[0].data.data[0].UG_Notice,
+        //       icon: result[0].data.data[0].UG_Icon,
+        //       createTime: result[0].data.data[0].UG_CreateTime,
+        //       adminId: result[0].data.data[0].UG_AdminID,
+        //       members: []
+        //     };
+        //     result[1].data.data.forEach(obj => {
+        //       this.curGroupDetailData.members.push({
+        //         groupNick: obj.UGU_GroupNick,
+        //         memberId: obj.UGU_UserID,
+        //         joinTime: obj.UGU_CreateTime,
+        //         authority: obj.UGU_Authority
+        //       })
+        //     });
+        //     this.$store.state.myGroupCheckedId = index;
+        //     // this.curGroup=this.groupsList.createGroup.filter(obj=>obj.groupId === this.$store.state.myGroupCheckedId)[0] ||this.groupsList.joinGroup.filter(obj=>obj.groupId === this.$store.state.myGroupCheckedId)[0];
+        //     // this.getGroupMessage(index, indexPath).then(() => {
+        //     //   this.$nextTick(() => {
+        //     //     toBottom(this.$refs.message.$el);
+        //     //   });
+        //     // })
+        //   }
+        // })
+        this.$store.state.myGroupCheckedId = index;
       },
       // beforeFileUpload(file) {
       //   const isLt100M = file.size / 1024 / 1024 < 100;
@@ -436,7 +437,7 @@
       //   this.socket.emit('remandFriend', {
       //     from: res.data.from,
       //     filePath: res.data.filePath,
-      //     groupId: this.curGroupId,
+      //     groupId: this.$store.state.myGroupCheckedId,
       //     groupName: this.curGroup.groupName,
       //     uName: res.data.uName,
       //     messageType: 4
@@ -470,7 +471,7 @@
       //     this.socket.emit('remandFriend', {
       //       message: `<video src="http://${this.$store.state.statisFileIp + res.data.filePath}" loop controls></video>`,
       //       from: res.data.from,
-      //       groupId: this.curGroupId,
+      //       groupId: this.$store.state.myGroupCheckedId,
       //       groupName: this.curGroup.groupName,
       //       uName: res.data.uName,
       //       messageType: 3
@@ -486,7 +487,7 @@
       //     this.socket.emit('remandFriend', {
       //       message: `<img src="http://${this.$store.state.statisFileIp + res.data.filePath}"></img>`,
       //       from: res.data.from,
-      //       groupId: this.curGroupId,
+      //       groupId: this.$store.state.myGroupCheckedId,
       //       groupName: this.curGroup.groupName,
       //       uName: res.data.uName,
       //       messageType: 3
@@ -526,7 +527,7 @@
       //       messageType: 1,
       //       message: this.message,
       //       from: this.$store.state.userId,
-      //       groupId: this.curGroupId,
+      //       groupId: this.$store.state.myGroupCheckedId,
       //       uName: uName || this.$store.state.nickName || this.$store.state.userId
       //     };
       //     let matchResult = this.message.match(/\{[0-9a-zA-Z]+(\-\g+){0,1}\}/ig);
@@ -557,7 +558,7 @@
       //         this.$store.state.socket.emit('remandFriend', {
       //           message: translateExpress(2, this.message, this.expressArr.filter(name => getExpressName(this.message).includes(name.split('.')[0])), this.$store.state.statisFileIp),
       //           from: this.$store.state.userId,
-      //           groupId: this.curGroupId,
+      //           groupId: this.$store.state.myGroupCheckedId,
       //           groupName: this.curGroup.groupName,
       //           uName: params.uName
       //         });
@@ -569,7 +570,7 @@
       // selectGroup(index) {
       //   if (this.groupIndex === index) return;
       //   this.groupIndex = index;
-      //   this.curGroupId = this.groupsList[index].groupId;
+      //   this.$store.state.myGroupCheckedId = this.groupsList[index].groupId;
       //   this.getGroupMessage(index)
       // },
       getAllGroups() {
@@ -610,7 +611,10 @@
                 temp.requestGroup.push(JSON.parse(obj.UM_Remark));
               });
               this.groupsList = temp;
-              console.log(this.groupsList)
+              if(this.$store.state.myGroupCheckedId!==''&&(temp.createGroup.every(obj=>obj.groupId!==this.$store.state.myGroupCheckedId)||temp.joinGroup.every(obj=>obj.groupId!==this.$store.state.myGroupCheckedId))){
+                this.$store.state.myGroupCheckedId='';
+              }
+              // console.log(this.groupsList)
               resolve();
             }
           });
@@ -808,6 +812,9 @@
                   color: rgb(255, 208, 75);
                 }
               }
+            }
+            .is-active{
+              color: white !important;
             }
           }
         }

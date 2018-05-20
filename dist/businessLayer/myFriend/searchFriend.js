@@ -7,6 +7,9 @@ exports.searchFriend = (params, callback) => {
   if (params.userId) {
     sql += ` and friends.F_UserID="${params.userId}"`;
   };
+  if (params.friendId) {
+    sql += ` and friends.F_FriendID="${params.friendId}"`;
+  };
   // let tableKey = [];
   // Object.keys(params).forEach(key => {
   //   if (params[key] !== null && changeFriendKey(key) !== null) {

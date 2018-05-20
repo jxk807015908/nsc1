@@ -24,7 +24,7 @@
             <el-col :span="17"><span>群名：</span></el-col>
             <el-col :span="7">
               <span v-if="$store.state.userId!==openData.adminId">{{params.groupName}}</span>
-              <el-input v-else v-model="params.groupName"></el-input>
+              <el-input :maxlength="20" v-else v-model="params.groupName"></el-input>
             </el-col>
           </el-row>
         </div>
@@ -33,7 +33,7 @@
           <el-row>
             <el-col :span="17"><span>我的群片名：</span></el-col>
             <el-col :span="7">
-              <el-input v-model="params.groupNick"></el-input>
+              <el-input :maxlength="20" v-model="params.groupNick"></el-input>
             </el-col>
           </el-row>
         </div>
@@ -260,9 +260,9 @@
           };
           this.$http.post('/quitGroup.do', post).then(res => {
             if (res.data.success) {
-              console.log(this.$refs.members.$el)
-              console.log(document.getElementsByClassName('members-popover'));
-              document.getElementsByClassName('members-popover')[0].blur();
+              // console.log(this.$refs.members.$el)
+              // console.log(document.getElementsByClassName('members-popover'));
+              // document.getElementsByClassName('members-popover')[0].blur();
               // document.getElementsByClassName('members-popover')[0].style.display='none';
               this.$message({message: '成功退出', type: 'success'});
               this.$parent.getAllGroups();

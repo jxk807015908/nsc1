@@ -89,8 +89,11 @@
         if (value === 1) {
           this.$router.push({name: 'personal'})
         } else if (value === 4) {
-          this.$store.state.socket.emit('img');
+          // this.$http.post()
+          // this.$store.state.socket.emit('img');
+          this.$store.dispatch('socketDisconnect');
           this.$router.push({name: 'login'})
+          sessionStorage.clear();
         } else {
 
         }
@@ -135,7 +138,8 @@
             let button = document.getElementsByClassName(`${item.from}Button${time}`);
             button[0].onclick = () => {
               notify.close();
-              this.$router.push({name: 'myGroups', params: {groupId: item.groupId}})
+              this.$router.push({name: 'myGroups', params: {groupId: item.groupId}});
+              this.$store.state.myGroupCheckedId=item.groupId;
             };
           } else {
             let notify;
@@ -150,6 +154,7 @@
             button[0].onclick = () => {
               notify.close();
               this.$router.push({name: 'myFriend', params: {friendId: item.from}})
+              this.$store.state.myFriendCheckedId=item.from;
             };
           }
         });

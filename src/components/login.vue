@@ -5,11 +5,11 @@
       <div v-show="wrapType===1" >
         <div class="input-group">
           <label for="userId">账号:</label>
-          <el-input v-model="userId" id="userId"></el-input>
+          <el-input :maxlength="20" v-model="userId" id="userId"></el-input>
         </div>
         <div class="input-group">
           <label for="password">密码:</label>
-          <el-input v-model="password" id="password" type="password"></el-input>
+          <el-input :maxlength="20" v-model="password" id="password" type="password"></el-input>
         </div>
         <div class="input-group clearfix">
           <input ref="remember" id="remember" class="fl" type="checkbox" @click="clickRemember"/>
@@ -25,20 +25,20 @@
       </div>
       <div v-show="wrapType===2" class="register-warp">
         <label for="ruserId">账号:</label>
-        <el-input v-model="registerParams.userId" id="ruserId" @blur="checkuserId"></el-input>
+        <el-input :maxlength="20" v-model="registerParams.userId" id="ruserId" @blur="checkuserId"></el-input>
         <div class="alerts">
           <el-alert v-if="tip.userId==1" title="该用户已注册" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.userId==3" title="可以注册" type="success" :closable="false"></el-alert>
           <el-alert v-if="tip.userId==2" title="用户名不能为空" type="error" :closable="false"></el-alert>
         </div>
         <label for="rFPassword">密码:</label>
-        <el-input v-model="registerParams.fPassword" id="rFPassword" type="password" @blur="checkFPassword"></el-input>
+        <el-input :maxlength="20" v-model="registerParams.fPassword" id="rFPassword" type="password" @blur="checkFPassword"></el-input>
         <div class="alerts">
           <el-alert v-if="tip.fPassword==1" title="密码不一致" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.fPassword==2" title="密码不能为空" type="error" :closable="false"></el-alert>
         </div>
         <label for="rSPassword">确认密码:</label>
-        <el-input v-model="registerParams.sPassword" id="rSPassword" type="password" @blur="checkSPassword"></el-input>
+        <el-input :maxlength="20" v-model="registerParams.sPassword" id="rSPassword" type="password" @blur="checkSPassword"></el-input>
         <div class="alerts">
           <el-alert v-if="tip.sPassword==1" title="密码不一致" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.sPassword==2" title="密码不能为空" type="error" :closable="false"></el-alert>
@@ -56,7 +56,7 @@
       </div>
       <div v-show="wrapType===3" class="forget-warp">
         <label>账号:</label>
-        <el-input v-model="forgetId" @blur="" placeholder="请输入账号"></el-input>
+        <el-input :maxlength="20" v-model="forgetId" @blur="" placeholder="请输入账号"></el-input>
         <label>邮箱:</label>
         <el-input v-model="forgetEmail" @blur="" placeholder="请输入邮箱"></el-input>
         <div class="button-group">

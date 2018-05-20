@@ -3,7 +3,7 @@
     <dialogs :dialogFlag.sync="dialogFlag" :openTitle="'ID:'+openData.userId" :isDefaultBtn="false" @close="close" @open="open">
       <div slot="dialogContent">
         <div class="headImg">
-          <headPortrait :isSave="true" :userId="openData.userId"></headPortrait>
+          <headPortrait :isSave="false" :userId="openData.userId"></headPortrait>
         </div>
         <el-row>
           <el-col :span="12">昵称：</el-col>
