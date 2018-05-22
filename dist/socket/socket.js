@@ -64,6 +64,7 @@ exports.socket = (server) => {
                             userId: userId,
                             name: obj.F_Name || result2[0].U_NickName || userId
                           });
+                          io.sockets.to(toUser.socketId).emit('refreshFriend');
                         }
                       });
                     }
@@ -168,6 +169,7 @@ exports.socket = (server) => {
                           userId: userId,
                           name: obj.F_Name || result2[0].U_NickName || userId
                         });
+                        io.sockets.to(toUser.socketId).emit('refreshFriend');
                       }
                     });
                     // io.sockets.to(toUser.socketId).emit('friendDisconnectRemand',{userId:userId,name:obj.F_Name||obj.U_NickName||obj.U_LoginID});
@@ -198,10 +200,10 @@ exports.socket = (server) => {
               members.push(item.UGU_UserID);
             });
             let toUsers = users.filter(item => members.includes(item.userId) && item.userId !== obj.from);
-            console.log('-------------------------------------');
-            console.log(users);
-            console.log(toUsers);
-            console.log(members);
+            // console.log('-------------------------------------');
+            // console.log(users);
+            // console.log(toUsers);
+            // console.log(members);
             toUsers.forEach(item => {
               console.log('给' + item.userId + '发送消息推送');
               io.sockets.to(item.socketId).emit('getMessageToHead', obj);

@@ -22,53 +22,57 @@ exports.sendGroupMessage = (app) => {
     req.on('end', () => {
       data = decodeURI(data);
       let dataObject = JSON.parse(data);
+      //增加提醒数量
       function opera() {
         return new Promise((resolve, reject) => {
           selectUserGroupsToUser2Fn({groupId:dataObject.groupId}).then((result2)=>{
             let length=result2.length;
             let num=0;
-            result2.forEach(obj=>{
-              if(obj.UGU_UserID!==dataObject.from){
-                selectUserMessagesFn({
-                  fromId:dataObject.groupId,
-                  toId: obj.UGU_UserID,
-                  messageType: 1,
-                  remark: 'group',
-                }).then((result) => {
-                  if (result.length === 0) {
-                    insertUserMessagesFn({
-                      messageType: 1,
-                      time: `${new Date().getTime()}`,
-                      fromId:dataObject.groupId,
-                      toId: obj.UGU_UserID,
-                      fromName: dataObject.fromName,
-                      remark: 'group',
-                      tipNum: 1,
-                    }).then(() => {
-                      num++;
-                      num===length&&resolve();
-                    })
-                  } else {
-                    updateUserMessagesFn({
-                      id: result[0].UM_ID,
-                      tipNum: result[0].UM_TipNum + 1
-                    }).then(() => {
-                      num++;
-                      num===length&&resolve();
-                    })
-                  }
-                }).catch(() => {
-                  reject();
-                })
-              }else{
-                num++;
-                num===length&&resolve();
-              }
-            })
+            if(result2.some(obj=>obj.UGU_UserID===dataObject.from)){
+              result2.forEach(obj=>{
+                if(obj.UGU_UserID!==dataObject.from){
+                  selectUserMessagesFn({
+                    fromId:dataObject.groupId,
+                    toId: obj.UGU_UserID,
+                    messageType: 1,
+                    remark: 'group',
+                  }).then((result) => {
+                    if (result.length === 0) {
+                      insertUserMessagesFn({
+                        messageType: 1,
+                        time: `${new Date().getTime()}`,
+                        fromId:dataObject.groupId,
+                        toId: obj.UGU_UserID,
+                        fromName: dataObject.fromName,
+                        remark: 'group',
+                        tipNum: 1,
+                      }).then(() => {
+                        num++;
+                        num===length&&resolve();
+                      })
+                    } else {
+                      updateUserMessagesFn({
+                        id: result[0].UM_ID,
+                        tipNum: result[0].UM_TipNum + 1
+                      }).then(() => {
+                        num++;
+                        num===length&&resolve();
+                      })
+                    }
+                  }).catch(() => {
+                    reject();
+                  })
+                }else{
+                  num++;
+                  num===length&&resolve();
+                }
+              })
+            }else{
+              reject(1);
+            }
           });
         })
       }
-
       Promise.all([insertGroupsMessageFn({
         messageType: dataObject.messageType,
         message: dataObject.message,
@@ -85,11 +89,15 @@ exports.sendGroupMessage = (app) => {
           msg: '',
           success: true
         })
-      }).catch(() => {
+      }).catch((val) => {
+        let msg='发生错误';
+        if(val===1){
+          msg='你现在不是群成员无法发言';
+        }
         (!isSend) && res.send({
           code: 10000,
           data: null,
-          msg: '发生错误',
+          msg: msg,
           success: false
         })
       })

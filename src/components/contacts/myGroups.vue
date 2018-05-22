@@ -18,7 +18,7 @@
               <headPortrait :isSave="true" :class="`group${group.groupId}`" :imgUrl="group.groupIcon"
                             @imgClick="imgClick"
                             :indexPath="group.groupId"></headPortrait>
-              <span>{{group.groupName}}</span>
+              <span :title="group.groupName">{{group.groupName}}</span>
             </li>
           </ul>
         </div>
@@ -56,7 +56,7 @@
                 <div>
                   <headPortrait :class="`group${group.groupId}`" :imgUrl="group.groupIcon" @imgClick="imgClick"
                                 :indexPath="group.groupId"></headPortrait>
-                  <span :class="{isActive:group.groupId === $store.state.myGroupCheckedId}">{{group.groupName}}</span>
+                  <span :title="group.groupName" :class="{isActive:group.groupId === $store.state.myGroupCheckedId}">{{group.groupName}}</span>
                   <!--<div class="cascader" @click.stop="">-->
                   <!--<el-cascader-->
                   <!--:ref="'group'+index"-->
@@ -273,12 +273,12 @@
         this.select(group.groupId, [group.groupAdminId === this.$store.state.userId ? '0' : '1', group.groupId]);
         this.searchParams = '';
       },
-      // getGroupDetailData(groupId) {
-      //   return this.$http.post('/getGroupDetailData.do', {groupId: groupId})
-      // },
-      // getGroupMembers(groupId) {
-      //   return this.$http.post('/getGroupMembers.do', {groupId: groupId})
-      // },
+      getGroupDetailData(groupId) {
+        return this.$http.post('/getGroupDetailData.do', {groupId: groupId})
+      },
+      getGroupMembers(groupId) {
+        return this.$http.post('/getGroupMembers.do', {groupId: groupId})
+      },
       imgClick(indexPath) {
         // let group=indexPath[0]==='0'?this.groupsList.createGroup.filter(obj=>obj.groupId===indexPath[1])[0]:this.groupsList.joinGroup.filter(obj=>obj.groupId===indexPath[1])[0];
         // let group=indexPath[0]==='0'?this.groupsList.createGroup[indexPath[1]]:this.groupsList.joinGroup[indexPath[1]];
@@ -778,6 +778,7 @@
         .my-group {
           height: calc(~'100% - 65px - 40px');
           overflow-y: auto;
+          overflow-x: hidden;
           .el-menu {
             min-height: calc(~'100% - 30px');
             border: 0;

@@ -66,7 +66,7 @@
 <style lang="less">
   .friendDetailDialog {
     .el-dialog {
-      width: 20%;
+      width: 30%;
       min-width: 300px;
       .headImg{
         text-align: center;

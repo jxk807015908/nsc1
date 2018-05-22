@@ -14,7 +14,7 @@
           <ul class="filter-friend-wrap" :class="{hasFriend:filterFriend.length!==0,friendWrapHide:!isFilterFriendShow}">
             <li v-for="friend in filterFriend" @click="goTofriend(friend)">
               <headPortrait @imgClick="imgClick" :indexPath="friend.friendId" :isSave="true" :status="friend.status" :userId="friend.friendId" :hasDetail="true" :data="friend"></headPortrait>
-              <span :class="{lowColor:friend.status === 0,isActive:friend.friendId === $store.state.myFriendCheckedId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
+              <span :title="friend.remark||friend.nickName||friend.friendId" :class="{lowColor:friend.status === 0,isActive:friend.friendId === $store.state.myFriendCheckedId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
             </li>
           </ul>
         </div>
@@ -40,7 +40,7 @@
                   <!--</el-tooltip>-->
                   <!--<img src="../../assets/imgages/userBaseHeadImg.png" alt="">-->
                   <headPortrait @imgClick="imgClick" :indexPath="friend.friendId" :status="friend.status" :userId="friend.friendId" :hasDetail="true" :data="friend"></headPortrait>
-                  <span :class="{lowColor:friend.status === 0,isActive:friend.friendId === $store.state.myFriendCheckedId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
+                  <span :title="friend.remark||friend.nickName||friend.friendId" :class="{lowColor:friend.status === 0,isActive:friend.friendId === $store.state.myFriendCheckedId}">{{friend.remark||friend.nickName||friend.friendId}}</span>
                   <div class="cascader" @click.stop="">
                     <el-cascader
                       :ref="'friendMenu'+index+'-'+index2"
@@ -342,6 +342,7 @@
           (async () => {
             await this.deleteFriend(this.friendGroup[index].content[index2].friendId);
             this.$store.state.myFriendCheckedId===this.friendGroup[index].content[index2].friendId&&(this.$store.state.myFriendCheckedId='');
+            this.$store.state.socket.emit('sendRemind',{toId:this.friendGroup[index].content[index2].friendId});
             this.getFriend();
           })()
         }
@@ -741,7 +742,7 @@
       socket: {
         handler(value, oldValue) {
           if (value&&this.isSocketListen===false) {
-            value.on('refreshFriend', (item) => {
+            value.on('refreshFriend', () => {
               (async () => {
                 await this.getFriendGroup();
                 await this.getFriend();
@@ -893,6 +894,7 @@
         .my-group {
           height: calc(~'100% - 30px - 30px');
           overflow-y: auto;
+          overflow-x: hidden;
           .el-menu {
             min-height: calc(~'100% - 30px');
             border: 0;
