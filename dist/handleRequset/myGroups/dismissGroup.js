@@ -1,10 +1,13 @@
 const deleteUserGroupsToUser = require("../../businessLayer/usergroupstouser/deleteUserGroupsToUser");
 const deleteUserGroups = require("../../businessLayer/usergroups/deleteUserGroups");
 const selectUserGroupsToUser2 = require("../../businessLayer/usergroupstouser/selectUserGroupsToUser2");
+const deleteGroupsMessage = require("../../businessLayer/groupsMessage/deleteGroupsMessage");
+const rimraf = require("rimraf");
+const path = require("path");
 exports.dismissGroup = (app) => {
   app.post('/dismissGroup.do', (req, res) => {
     let isSend = false;
-    res.setTimeout(3000, () => {
+    res.setTimeout(10000, () => {
       isSend = true;
       res.send({
         code: 10000,
@@ -24,7 +27,7 @@ exports.dismissGroup = (app) => {
         groupId: dataObject.groupId
       }).then(result=>{
         if(result.length===1){
-          Promise.all([deleteUserGroupsToUserFn({groupId: dataObject.groupId}),deleteUserGroupsFn({adminId:dataObject.userId,groupId: dataObject.groupId})]).then(()=>{
+          Promise.all([deleteUserGroupsToUserFn({groupId: dataObject.groupId}),deleteUserGroupsFn({adminId:dataObject.userId,groupId: dataObject.groupId}),deleteGroupsMessageFn({groupId:dataObject.groupId}),deleteGroupDataFile(path.join(__dirname + "/../../data/groups/"+dataObject.groupId))]).then(()=>{
             (!isSend) && res.send({
               code: 10000,
               data: null,
@@ -35,10 +38,17 @@ exports.dismissGroup = (app) => {
             (!isSend) && res.send({
               code: 10000,
               data: null,
-              msg: '查询用户表和好友表发生错误',
+              msg: '发生错误',
               success: false
             })
           });
+        }else if(result.length===0){
+          (!isSend) && res.send({
+            code: 10000,
+            data: null,
+            msg: '该群不存在',
+            success: false
+          })
         }else{
           (!isSend) && res.send({
             code: 10000,
@@ -82,6 +92,29 @@ function selectUserGroupsToUser2Fn(obj) {
         reject();
       } else {
         resolve(result);
+      }
+    });
+  });
+}
+function deleteGroupsMessageFn(obj) {
+  return new Promise((resolve, reject) => {
+    deleteGroupsMessage.deleteGroupsMessage(obj, (result) => {
+      if (result === 'error') {
+        reject();
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+function deleteGroupDataFile(path) {
+  return new Promise((resolve, reject) => {
+    rimraf(path,function(err){
+      if (err) {
+        console.error(err);
+        reject();
+      }else{
+        resolve();
       }
     });
   });
