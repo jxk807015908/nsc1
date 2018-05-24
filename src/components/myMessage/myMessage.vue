@@ -128,6 +128,10 @@
       getGroupDetail(groupId){
         Promise.all([this.getGroupDetailData(groupId),this.getGroupMembers(groupId)]).then(result=>{
           if(result[0].data.success&&result[1].data.success){
+            if(result[0].data.data.length===0){
+              this.$message.error('该群不存在');
+              return
+            }
             this.groupDetailData= {
               groupId:result[0].data.data[0].UG_ID,
               groupName:result[0].data.data[0].UG_Name,

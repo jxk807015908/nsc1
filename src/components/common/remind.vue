@@ -59,15 +59,22 @@
       };
     },
     mounted() {
-      if (this.data.messageType === '1' && this.data.remark === 'group') {
-        this.$http.post('/getGroupDetailData.do', {groupId: this.data.fromId}).then(res => {
-          if (res.data.success) {
-            this.groupIcon = res.data.data[0].UG_Icon;
-          }
-        })
-      }
+      this.init();
     },
     methods: {
+      init(){
+        if (this.data.messageType === '1' && this.data.remark === 'group') {
+          this.$http.post('/getGroupDetailData.do', {groupId: this.data.fromId}).then(res => {
+            if (res.data.success) {
+              if(res.data.data[0]){
+                this.groupIcon = res.data.data[0].UG_Icon;
+              }else{
+                this.groupIcon = 'none';
+              }
+            }
+          })
+        }
+      },
       imgClick(userId) {
         let messageVm=this.$parent;
         while(messageVm.$el.className!=='myMessage'){
@@ -85,6 +92,14 @@
       },
       deleteRemind() {
         this.$emit('deleteRemind', this.index)
+      }
+    },
+    watch:{
+      data:{
+        handler(){
+          this.init();
+        },
+        deep:true
       }
     },
     components: {

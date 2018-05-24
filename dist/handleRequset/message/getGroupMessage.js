@@ -1,6 +1,7 @@
 const selectGroupsMessage = require("../../businessLayer/groupsMessage/selectGroupsMessage");
 const updateUserMessages2 = require("../../businessLayer/usermessages/updateUserMessages2");
 const selectUserGroupsToUser2 = require("../../businessLayer/usergroupstouser/selectUserGroupsToUser2");
+const selectUserGroups = require("../../businessLayer/usergroups/selectUserGroups");
 const fs=require('fs');
 const path=require('path');
 exports.getGroupMessage = (app) => {
@@ -25,12 +26,15 @@ exports.getGroupMessage = (app) => {
       data = decodeURI(data);
       let total = 0;
       let dataObject = JSON.parse(data);
-      selectUserGroupsToUser2Fn({
-        groupId:dataObject.groupId
-      }).then(result3=>{
-        // console.log("sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
-        // console.log(result3)
-        if(result3.some(obj=>obj.UGU_UserID===dataObject.userId)){
+      Promise.all([selectUserGroupsFn({groupId:dataObject.groupId}),selectUserGroupsToUser2Fn({groupId:dataObject.groupId})]).then(result3=>{
+        if(result3[0].length===0){
+          (!isSend) && res.send({
+            code: 1,
+            data: null,
+            msg: '该群不存在',
+            success: false
+          })
+        }else if(result3[1].some(obj=>obj.UGU_UserID===dataObject.userId)){
           updateUserMessages2Fn({
             update:{
               tipNum:0
@@ -129,7 +133,6 @@ exports.getGroupMessage = (app) => {
           })
         }
       });
-
     })
   });
 };
@@ -147,6 +150,17 @@ function updateUserMessages2Fn(obj) {
 function selectUserGroupsToUser2Fn(obj) {
   return new Promise((resolve, reject) => {
     selectUserGroupsToUser2.selectUserGroupsToUser2(obj, (result) => {
+      if (result === 'error') {
+        reject();
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+function selectUserGroupsFn(obj) {
+  return new Promise((resolve, reject) => {
+    selectUserGroups.selectUserGroups(obj, (result) => {
       if (result === 'error') {
         reject();
       } else {

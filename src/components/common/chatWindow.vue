@@ -157,6 +157,10 @@
             Promise.all([this.getGroupDetailData(this.chatId), this.getGroupMembers(this.chatId)]).then(result => {
               // console.log(result);
               if (result[0].data.success && result[1].data.success) {
+                if(result[0].data.data.length===0){
+                  this.$message.error('该群不存在');
+                  return
+                }
                 this.detailData = {
                   groupId: result[0].data.data[0].UG_ID,
                   groupName: result[0].data.data[0].UG_Name,
