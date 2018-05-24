@@ -9,7 +9,8 @@
         <img :src="file.iconPath" alt="">
         <div>
           <p>{{file.name}}</p>
-          <a @click="download">下载</a>
+          <!--<a @click="download">下载</a>-->
+          <a :href="`/downloadFile.do?filePath=${data.filePath}`">下载</a>
         </div>
       </div>
     </div>
@@ -57,7 +58,16 @@
         },
         methods:{
           download(){
-            window.open(this.file.path, '_blank');
+            this.$message({type:'success',message:'正在下载'});
+            this.$http.get('/downloadFile.do',{
+              params:{
+                filePath:this.data.filePath
+              }
+            }).then((res)=>{
+              window.open(res, '_blank');
+              this.$message({type:'success',message:'下载完成'});
+            })
+            // window.open(this.file.path, '_blank');
           },
           imgClick(indexPath){
             this.$emit('imgClick',indexPath);

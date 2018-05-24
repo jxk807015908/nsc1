@@ -67,6 +67,7 @@ const emailReg=require('./login/emailReg');
 const getPassword=require('./login/getPassword');
 const loginOut=require('./login/loginOut');
 const getFriendInfo=require('./myFriend/getFriendInfo');
+const downloadFile=require('./message/downloadFile');
 exports.handle=(app)=>{
   // const mysql=require('mysql');
   // const connection=mysql.createConnection({
@@ -132,5 +133,6 @@ exports.handle=(app)=>{
   getPassword.getPassword(app);
   loginOut.loginOut(app);
   getFriendInfo.getFriendInfo(app);
-}
+  downloadFile.downloadFile(app);
+};
 
