@@ -95,8 +95,8 @@
         name:'login',
         data: function () {
             return {
-              checkedCode:null,
-              randomCheckedCode:null,
+              checkedCode:'',
+              randomCheckedCode:'',
               isForgetLoading:false,
               forgetEmail:'',
               forgetId:'',

@@ -8,6 +8,7 @@
           </el-input>
         </div>
         <div class="search-result">
+          <paging v-if="$store.state.pageSize<total" :total="total" :pageNow="pageNow" @changePage="changePage"></paging>
           <div :class="{checked:checkedIndex===index}" class="user clearfix" :key="index"
                v-for="(obj,index) in searchList" @click="checkedIndex=index">
             <headPortrait :isSave="true" :imgUrl="obj.groupIcon"
@@ -30,6 +31,7 @@
 
 <script>
   import dialogs from '../../common/dialogs'
+  import paging from '../../common/paging'
   import headPortrait from '../../common/headPortrait'
 
   export default {
@@ -37,6 +39,8 @@
     props: ['dialogFlag','groupsList'],
     data: function () {
       return {
+        total:0,
+        pageNow:1,
         postParams: '',
         checkedIndex: '',
         searchList: []
@@ -44,8 +48,14 @@
     },
     methods: {
       open(){
+        this.pageNow=1;
+        this.total=0;
         this.postParams='';
         this.searchList=[];
+      },
+      changePage(page){
+        this.pageNow=page;
+        this.searchGroupsFuzzily();
       },
       requestJoinGroup(index) {
         let params = {
@@ -64,15 +74,12 @@
           }
         })
       },
-      search() {
-        if (this.postParams === '') {
-          this.$message.error('输入不能为空');
-          return;
-        }
-        this.$http.post('/searchGroupsFuzzily.do', {idOrName: this.postParams}).then(res => {
+      searchGroupsFuzzily(){
+        this.$http.post('/searchGroupsFuzzily.do', {idOrName: this.postParams,pageNo:this.pageNow,pageSize:this.$store.state.pageSize}).then(res => {
           if (res.data.success) {
             let temp = [];
-            res.data.data.length !== 0 && res.data.data.forEach(obj => {
+            this.total=res.data.data.total;
+            res.data.data.result.length !== 0 && res.data.data.result.forEach(obj => {
               temp.push({
                 groupId: obj.UG_ID,
                 groupIcon: obj.UG_Icon,
@@ -83,13 +90,23 @@
           }
         })
       },
+      search() {
+        if (this.postParams === '') {
+          this.$message.error('输入不能为空');
+          return;
+        }
+        this.pageNow=1;
+        this.total=0;
+        this.searchGroupsFuzzily();
+      },
       close() {
         this.$emit('update:dialogFlag', false)
       }
     },
     components: {
       dialogs,
-      headPortrait
+      headPortrait,
+      paging
     }
   }
 </script>
@@ -102,6 +119,11 @@
         .el-input__inner {
           height: 30px;
         }
+      }
+      .el-pagination{
+        text-align: right;
+        margin-top: 5px;
+        margin-bottom: 5px;
       }
       .search-result {
         //margin-top: 5px;

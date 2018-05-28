@@ -8,6 +8,7 @@
           </el-input>
         </div>
         <div class="search-result">
+          <paging v-if="$store.state.pageSize<total" :total="total" :pageNow="pageNow" @changePage="changePage"></paging>
           <div :class="{checked:checkedIndex===index}" class="user clearfix" :key="index"
                v-for="(obj,index) in searchList" @click="checkedIndex=index">
             <headPortrait :isSave="true" :status="obj.status" :userId="obj.userId" :hasDetail="false" :data="obj"></headPortrait>
@@ -33,12 +34,15 @@
 </template>
 <script>
   import dialogs from '../../common/dialogs'
+  import paging from '../../common/paging'
   import headPortrait from '../../common/headPortrait'
   export default {
     name: 'addFriendDialog',
     props: ['dialogFlag', 'friendList'],
     data: function () {
       return {
+        total:0,
+        pageNow:1,
         checkedIndex: '',
         searchList: [],
         postParams: '',
@@ -46,8 +50,14 @@
     },
     methods: {
       open(){
+        this.pageNow=1;
+        this.total=0;
         this.postParams='';
         this.searchList=[];
+      },
+      changePage(page){
+        this.pageNow=page;
+        this.searchUserFuzzily();
       },
       addFriend(index) {
         let params = {
@@ -123,15 +133,12 @@
           });
         }
       },
-      search() {
-        if (this.postParams === '') {
-          this.$message.error('输入不能为空');
-          return;
-        }
-        this.$http.post('/searchUserFuzzily.do', {idOrName: this.postParams}).then(res => {
+      searchUserFuzzily(){
+        this.$http.post('/searchUserFuzzily.do', {idOrName: this.postParams,pageNo:this.pageNow,pageSize:this.$store.state.pageSize}).then(res => {
           if (res.data.success) {
             let temp = [];
-            res.data.data.length !== 0 && res.data.data.forEach(obj => {
+            this.total=res.data.data.total;
+            res.data.data.result.length !== 0 && res.data.data.result.forEach(obj => {
               obj.U_LoginID !== this.$store.state.userId && temp.push({
                 userId: obj.U_LoginID,
                 nickName: obj.U_NickName,
@@ -142,10 +149,19 @@
                 friendPolicyType: obj.U_FriendshipPolicyID,
                 friendPolicyQuestion: obj.U_FriendPolicyQuestion
               })
-            })
+            });
             this.searchList = temp;
           }
         })
+      },
+      search() {
+        if (this.postParams === '') {
+          this.$message.error('输入不能为空');
+          return;
+        }
+        this.pageNow=1;
+        this.total=0;
+        this.searchUserFuzzily();
       },
       close() {
         this.$emit('update:dialogFlag', false)
@@ -153,7 +169,8 @@
     },
     components: {
       dialogs,
-      headPortrait
+      headPortrait,
+      paging
     }
   }
 </script>
@@ -165,6 +182,11 @@
         .el-input__inner {
           height: 30px;
         }
+      }
+      .el-pagination{
+        text-align: right;
+        margin-top: 5px;
+        margin-bottom: 5px;
       }
       .search-result {
         //margin-top: 5px;

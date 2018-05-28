@@ -18,18 +18,25 @@ exports.searchGroupsFuzzily = (app) => {
     req.on('end', () => {
       data = decodeURI(data);
       let dataObject = JSON.parse(data);
-      searchGroupsFuzzilyFn(dataObject).then((result)=>{
+      Promise.all([searchGroupsFuzzilyFn({idOrName: dataObject.idOrName}), searchGroupsFuzzilyFn({
+        idOrName: dataObject.idOrName,
+        pageNo: dataObject.pageNo,
+        pageSize: dataObject.pageSize
+      })]).then(result => {
         (!isSend) && res.send({
           code: 10000,
-          data: result,
+          data: {
+            result: result[1],
+            total: result[0].length
+          },
           msg: '',
           success: true
         })
-      },()=>{
+      }).catch(()=>{
         (!isSend) && res.send({
           code: 10000,
-          data: null,
-          msg: '查询用户表和好友表发生错误',
+          data:null,
+          msg: '操作失败',
           success: false
         })
       });

@@ -14,7 +14,7 @@ export default new Vuex.Store({
     nickName:null,
     userId:null,
     socket:null,
-    pageSize:10,
+    pageSize:5,
     expressArr:[],
     remindTips:0,
     messagePush:'',

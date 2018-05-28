@@ -9,8 +9,8 @@ export default {
   name: 'App',
   watch:{
     $route(to,from){
-      console.log('to',to);
-      console.log('from',from);
+      // console.log('to',to);
+      // console.log('from',from);
       if(to.name==='login'){
         this.$store.dispatch('socketDisconnect');
         sessionStorage.clear();
