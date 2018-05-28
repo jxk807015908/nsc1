@@ -16,6 +16,11 @@
             <i slot="prefix" class="fa fa-key fa-fw"></i>
           </el-input>
         </div>
+        <div class="input-group">
+          <!--<label for="password">密码:</label>-->
+          <el-input class="checkedCodeInput" :maxlength="4" v-model="checkedCode" placeholder="请输入验证码"></el-input>
+          <button class="checkedCodeButton" @click="getNewRandomCheckedCode">{{randomCheckedCode}}</button>
+        </div>
         <div class="input-group clearfix">
           <input ref="remember" id="remember" class="fl" type="checkbox" @click="clickRemember"/>
           <label for="remember" class="fl">记住密码</label>
@@ -85,11 +90,13 @@
   </div>
 </template>
 <script>
-  import {setCookie,getCookie} from "../util/common";
+  import {setCookie,getCookie,getRandomCheckedCode} from "../util/common";
   export default {
         name:'login',
         data: function () {
             return {
+              checkedCode:null,
+              randomCheckedCode:null,
               isForgetLoading:false,
               forgetEmail:'',
               forgetId:'',
@@ -116,6 +123,7 @@
           this.$store.state.userId=null;
           this.$store.state.nickName=null;
           this.$store.state.socket=null;
+          this.getNewRandomCheckedCode();
           //alert(localStorage.isRemember.constructor);
           if(localStorage.isRemember=='true'){
             //alert(localStorage.isRemember);
@@ -127,6 +135,9 @@
           //this.$store.dispatch('connectSocket')
         },
       methods:{
+        getNewRandomCheckedCode(){
+          this.randomCheckedCode=getRandomCheckedCode();
+        },
         getPassword(){
           if(this.forgetId==''||this.forgetEmail==""){
             this.$message.error('账号和邮箱不能为空');
@@ -243,6 +254,11 @@
             this.$message.error('账号和密码不能为空');
             return;
           }
+          if(this.checkedCode.toLocaleUpperCase()!==this.randomCheckedCode){
+            this.$message.error('验证码不正确');
+            this.getNewRandomCheckedCode();
+            return;
+          }
           this.isLoading=true;
 
           // this.$store.dispatch('login',{userId:this.userId,password:this.password,callback:()=>{
@@ -350,6 +366,20 @@
           /*background: rgba(45,45,45,.15);*/
           /*color: white !important;*/
         /*}*/
+        .checkedCodeInput{
+          width: 40%;
+        }
+        .checkedCodeButton{
+          padding-left: 1em;
+          border: none;
+          letter-spacing: 1em;
+          height: 34px;
+          text-align: center;
+          font-family:Cursive;
+          font-style: italic;
+          font-weight: bold;
+          opacity: 0.5;
+        }
         .el-input{
           /*background: rgba(45,45,45,.15)*/
           /*width:calc(~'100% - 36px');*/

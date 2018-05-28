@@ -92,7 +92,7 @@
           // this.$http.post()
           // this.$store.state.socket.emit('img');
           this.$store.dispatch('socketDisconnect');
-          this.$router.push({name: 'login'})
+          this.$router.push({name: 'login'});
           sessionStorage.clear();
         } else {
 

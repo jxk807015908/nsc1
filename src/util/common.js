@@ -362,8 +362,18 @@ export const hidePartlyTd=(vueTr,checkedIndexArr,tableHead,pageNow)=>{
       })
     }
   })
-}
+};
 
+export const getRandomCheckedCode=()=>{
+  let code=['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+    'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
+    'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  let checkedCode='';
+  for(let i=1;i<=4;i++){
+    checkedCode+=code[Math.floor(Math.random()*36)];
+  }
+  return checkedCode;
+};
 // export const insertTrEvent=(vueTr,trClickBack,aClickBack)=>{
 //   //let tr=this.$refs.table.getElementsByTagName('tr');
 //   let tr=vueTr[0].parentNode.getElementsByTagName('tr');
