@@ -458,7 +458,7 @@
               this.$nextTick(() => {
                 if(this.isShow){
                   this.toTopEvent();
-                  toBottom(this.$refs.message.$el);
+                  setTimeout(toBottom(this.$refs.message.$el),100);
                 }
               });
             })
