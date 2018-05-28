@@ -2,14 +2,19 @@
   <div class="login">
     <!--<img src="../assets/imgages/loginbg2.jpg" alt="">-->
     <div class="warp" :class="{registerWarp:wrapType===2,forgetWrap:wrapType===3}">
+      <p class="loginTitle">{{wrapType===1?'登录':wrapType===2?'注册':'忘记密码'}}</p>
       <div v-show="wrapType===1" >
         <div class="input-group">
-          <label for="userId">账号:</label>
-          <el-input :maxlength="20" v-model="userId" id="userId"></el-input>
+          <!--<label for="userId">账号:</label>-->
+          <el-input :maxlength="20" v-model="userId" id="userId" placeholder="请输入账号">
+            <i slot="prefix" class="fa fa-user-o"></i>
+          </el-input>
         </div>
         <div class="input-group">
-          <label for="password">密码:</label>
-          <el-input :maxlength="20" v-model="password" id="password" type="password"></el-input>
+          <!--<label for="password">密码:</label>-->
+          <el-input :maxlength="20" v-model="password" id="password" type="password" placeholder="请输入密码">
+            <i slot="prefix" class="fa fa-key fa-fw"></i>
+          </el-input>
         </div>
         <div class="input-group clearfix">
           <input ref="remember" id="remember" class="fl" type="checkbox" @click="clickRemember"/>
@@ -24,27 +29,35 @@
         </div>
       </div>
       <div v-show="wrapType===2" class="register-warp">
-        <label for="ruserId">账号:</label>
-        <el-input :maxlength="20" v-model="registerParams.userId" id="ruserId" @blur="checkuserId"></el-input>
+        <!--<label for="ruserId">账号:</label>-->
+        <el-input :maxlength="20" v-model="registerParams.userId" id="ruserId" @blur="checkuserId" placeholder="请输入账号">
+          <i slot="prefix" class="fa fa-user-o"></i>
+        </el-input>
         <div class="alerts">
           <el-alert v-if="tip.userId==1" title="该用户已注册" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.userId==3" title="可以注册" type="success" :closable="false"></el-alert>
           <el-alert v-if="tip.userId==2" title="用户名不能为空" type="error" :closable="false"></el-alert>
         </div>
-        <label for="rFPassword">密码:</label>
-        <el-input :maxlength="20" v-model="registerParams.fPassword" id="rFPassword" type="password" @blur="checkFPassword"></el-input>
+        <!--<label for="rFPassword">密码:</label>-->
+        <el-input :maxlength="20" v-model="registerParams.fPassword" id="rFPassword" type="password" @blur="checkFPassword" placeholder="请输入密码">
+          <i slot="prefix" class="fa fa-key fa-fw"></i>
+        </el-input>
         <div class="alerts">
           <el-alert v-if="tip.fPassword==1" title="密码不一致" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.fPassword==2" title="密码不能为空" type="error" :closable="false"></el-alert>
         </div>
-        <label for="rSPassword">确认密码:</label>
-        <el-input :maxlength="20" v-model="registerParams.sPassword" id="rSPassword" type="password" @blur="checkSPassword"></el-input>
+        <!--<label for="rSPassword">确认密码:</label>-->
+        <el-input :maxlength="20" v-model="registerParams.sPassword" id="rSPassword" type="password" @blur="checkSPassword" placeholder="请确认密码">
+          <i slot="prefix" class="fa fa-key fa-fw"></i>
+        </el-input>
         <div class="alerts">
           <el-alert v-if="tip.sPassword==1" title="密码不一致" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.sPassword==2" title="密码不能为空" type="error" :closable="false"></el-alert>
         </div>
-        <label for="email">邮箱:</label>
-        <el-input v-model="registerParams.email" id="email" type="text" @blur="checkEmail"></el-input>
+        <!--<label for="email">邮箱:</label>-->
+        <el-input v-model="registerParams.email" id="email" type="text" @blur="checkEmail" placeholder="请输入邮箱">
+          <i slot="prefix" class="fa fa-envelope"></i>
+        </el-input>
         <div class="alerts">
           <el-alert v-if="tip.email==1" title="邮箱格式不正确" type="error" :closable="false"></el-alert>
           <el-alert v-if="tip.email==2" title="邮箱不能为空" type="error" :closable="false"></el-alert>
@@ -55,10 +68,14 @@
         </div>
       </div>
       <div v-show="wrapType===3" class="forget-warp">
-        <label>账号:</label>
-        <el-input :maxlength="20" v-model="forgetId" @blur="" placeholder="请输入账号"></el-input>
-        <label>邮箱:</label>
-        <el-input v-model="forgetEmail" @blur="" placeholder="请输入邮箱"></el-input>
+        <!--<label>账号:</label>-->
+        <el-input :maxlength="20" v-model="forgetId" @blur="" placeholder="请输入账号">
+          <i slot="prefix" class="fa fa-user-o"></i>
+        </el-input>
+        <!--<label>邮箱:</label>-->
+        <el-input v-model="forgetEmail" @blur="" placeholder="请输入邮箱">
+          <i slot="prefix" class="fa fa-envelope"></i>
+        </el-input>
         <div class="button-group">
           <el-button type="primary" :disabled="isForgetLoading" :loading="isForgetLoading" @click="getPassword">确定</el-button>
           <el-button type="primary" plain @click="wrapType=1">返回</el-button>
@@ -272,22 +289,55 @@
     }
 </script>
 <style lang="less">
+  @keyframes changeBg {
+    0%   {
+      background: url("../assets/imgages/1.jpg") no-repeat;
+      background-size:100%;
+    }
+    25%  {
+      background: url("../assets/imgages/2.jpg") no-repeat;
+      background-size:100%;
+    }
+    50%  {
+      background: url("../assets/imgages/3.jpg") no-repeat;
+      background-size:100%;
+    }
+    100% {
+      background: url("../assets/imgages/1.jpg") no-repeat;
+      background-size:100%;
+    }
+  }
   .login{
     height: 100%;
-    background: url("../assets/imgages/loginbg2.jpg");
+    animation: changeBg 10s infinite;
+    /*background: url("../assets/imgages/loginbg2.jpg");*/
+    /*background-size:100% auto;*/
     font-size: 14px;
     img{
       width: 100%;
     }
+    .fa{
+      font-size: 20px;
+      line-height: 34px;
+    }
     .warp{
       width: 20%;
       padding: 20px 20px 0 20px;
-      border:1px solid black;
+      border:1px solid #3a8ee6;
       border-radius: 6px;
       //margin: 0 auto;
       position: absolute;
       left: 40%;
       top: calc(~'50% - 150px');
+      .loginTitle{
+        text-align: center;
+        color: white;
+        font-size: 20px;
+        position: absolute;
+        width: 100%;
+        top: -30px;
+        left: 0;
+       }
       .el-input__inner{
         height: 34px;
       }
@@ -295,17 +345,20 @@
         margin-bottom: 20px;
         width: 100%;
         vertical-align: middle;
-        input{
-          vertical-align: middle;
-        }
+        /*input{*/
+          /*vertical-align: middle;*/
+          /*background: rgba(45,45,45,.15);*/
+          /*color: white !important;*/
+        /*}*/
         .el-input{
-          width:calc(~'100% - 36px');
+          /*background: rgba(45,45,45,.15)*/
+          /*width:calc(~'100% - 36px');*/
         }
         .el-button{
           width: 100%;
         }
         .forget{
-          color: #3a8ee6;
+          color: red;
         }
       }
       .register-warp{
@@ -340,9 +393,28 @@
     .forgetWrap{
       top:calc(~'50% - 120px')
     }
+    /*input:-webkit-autofill {*/
+      /*-webkit-box-shadow: 0 0 0 1000px white inset;*/
+      /*border: 1px solid #CCC!important;*/
+    /*}*/
+    input{
+      vertical-align: middle;
+      background: rgba(45,45,45,.15);
+      color: white !important;
+    }
     input:-webkit-autofill {
-      -webkit-box-shadow: 0 0 0 1000px white inset;
-      border: 1px solid #CCC!important;
+      -webkit-animation: autofill-fix 1s infinite;
+    }
+
+    @-webkit-keyframes autofill-fix {
+      from {
+        background-color: transparent;
+        color: white;
+      }
+      to {
+        background-color: transparent;
+        color: white;
+      }
     }
   }
 

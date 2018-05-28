@@ -910,6 +910,7 @@
                 }
                 .el-cascader {
                   height: 50px;
+                  margin-left: 14px;
                   input, .el-cascader__label {
                     display: none;
                   }

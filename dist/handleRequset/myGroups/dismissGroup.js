@@ -26,7 +26,15 @@ exports.dismissGroup = (app) => {
       selectUserGroupsToUser2Fn({
         groupId: dataObject.groupId
       }).then(result=>{
-        if(result.length===1){
+        let user=result.filter(obj=>obj.UGU_UserID===dataObject.userId);
+        if(!user[0]){
+          (!isSend) && res.send({
+            code: 10000,
+            data: null,
+            msg: '你不是该群成员',
+            success: false
+          })
+        }else if(user[0].UGU_Authority==1){
           Promise.all([deleteUserGroupsToUserFn({groupId: dataObject.groupId}),deleteUserGroupsFn({adminId:dataObject.userId,groupId: dataObject.groupId}),deleteGroupsMessageFn({groupId:dataObject.groupId}),deleteGroupDataFile(path.join(__dirname + "/../../data/groups/"+dataObject.groupId))]).then(()=>{
             (!isSend) && res.send({
               code: 10000,
@@ -42,18 +50,11 @@ exports.dismissGroup = (app) => {
               success: false
             })
           });
-        }else if(result.length===0){
+        } else{
           (!isSend) && res.send({
             code: 10000,
             data: null,
-            msg: '该群不存在',
-            success: false
-          })
-        }else{
-          (!isSend) && res.send({
-            code: 10000,
-            data: null,
-            msg: '只有一人时才能解散群',
+            msg: '你没有权限',
             success: false
           })
         }

@@ -6,6 +6,7 @@
       <video ref="hisVideo" class="video video2" src="" autoplay></video>
       <i class="el-icon-close" @click="closeVideo"></i>
     </div>
+    <lookPicture v-if="$store.state.imgUrl" :imgUrl="$store.state.imgUrl"></lookPicture>
     <myHead></myHead>
     <div class="content">
       <keep-alive>
@@ -16,6 +17,7 @@
 </template>
 <script>
   import myHead from './common/myHead'
+  import lookPicture from './common/lookPicture'
   import {setCookie,getCookie} from "../util/common";
   export default {
       name:'home',
@@ -299,7 +301,8 @@
         }
       },
       components:{
-        myHead
+        myHead,
+        lookPicture
       }
     }
 </script>

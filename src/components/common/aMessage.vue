@@ -2,7 +2,7 @@
   <div :class="{aMessage:true,atRight:isAtRight}">
     <!--<img :class="{fl:!isAtRight,fr:isAtRight}" src="../../assets/imgages/userBaseHeadImg.png" alt="">-->
     <headPortrait @imgClick="imgClick" :indexPath="data.senderId" :isSave="false" :class="{fl:!isAtRight,fr:isAtRight}" :userId="data.senderId"></headPortrait>
-    <div class="content" :class="{fl:!isAtRight,fr:isAtRight}">
+    <div ref="messageContent" class="content" :class="{fl:!isAtRight,fr:isAtRight}">
       <span id="name">{{name}}</span>
       <div v-if="data.messageType!==4" v-html="data.message"></div>
       <div v-if="data.messageType===4" class="file-wrap">
@@ -48,6 +48,14 @@
           }
         },
         mounted(){
+          this.$nextTick(()=>{
+            let imgArr=this.$refs.messageContent.getElementsByTagName('img');
+            Array.prototype.forEach.call(imgArr,(obj)=>{
+              obj.onclick=()=>{
+                this.$store.state.imgUrl=obj.src;
+              }
+            })
+          })
           // console.log('messageType:',this.data.messageType);
           // if(this.data.messageType===4){
           //   let arr=this.data.filePath.split('/');
@@ -57,6 +65,9 @@
           // }
         },
         methods:{
+          // lookPicture(imgUrl){
+          //   this.$store.state.imgUrl=imgUrl;
+          // },
           download(){
             this.$message({type:'success',message:'正在下载'});
             this.$http.get('/downloadFile.do',{
@@ -71,6 +82,21 @@
           },
           imgClick(indexPath){
             this.$emit('imgClick',indexPath);
+          }
+        },
+        watch:{
+          data:{
+            handler(){
+              this.$nextTick(()=>{
+                let imgArr=this.$refs.messageContent.getElementsByTagName('img');
+                Array.prototype.forEach.call(imgArr,(obj)=>{
+                  obj.onclick=()=>{
+                    this.$store.state.imgUrl=obj.src;
+                  }
+                })
+              })
+            },
+            deep:true
           }
         },
         components:{

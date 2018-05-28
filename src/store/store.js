@@ -19,7 +19,8 @@ export default new Vuex.Store({
     remindTips:0,
     messagePush:'',
     myFriendCheckedId:'',
-    myGroupCheckedId:''
+    myGroupCheckedId:'',
+    imgUrl:null
   },
   mutations:{
 

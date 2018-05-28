@@ -44,7 +44,7 @@ exports.sendRegEmail = (app, connection) => {
       let ip=iptable[Object.keys(iptable)[0]];
       // console.log(iptable);
       let uid=uuid.v1();
-      let herf=`http://${ip}/#/register?uid=${uid}`;
+      let herf=`https://${ip}/#/register?uid=${uid}`;
       let html=`<a href="${herf}">${herf}</a>`;
       let mailOptions = {
         from:    "'nsc' <2788926558@qq.com>",        //谁发送的
