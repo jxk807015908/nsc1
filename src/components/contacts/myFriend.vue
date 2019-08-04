@@ -873,6 +873,13 @@
                 border-radius: 15px;
                 vertical-align: middle;
               }
+              span{
+                overflow: hidden;
+                text-overflow:ellipsis;
+                white-space: nowrap;
+                width: 120px;
+                display: inline-block;
+              }
               .lowColor {
                 color: gray;
                 vertical-align: middle;

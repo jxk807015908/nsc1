@@ -34,7 +34,7 @@ export default new Vuex.Store({
       // context.state.socket.emit('login',value || this.state.userId);
       context.state.socket.emit('login',this.state.userId);
       context.state.socket.on('loginSuccess',function (arr) {
-        new Vue().$message({message:'socket连接成功',type:'success'});
+        // new Vue().$message({message:'socket连接成功',type:'success'});
         let messagePush=sessionStorage.getItem("messagePush");
         if(messagePush.indexOf('1')===-1){
           console.log('好友上线推送关闭');

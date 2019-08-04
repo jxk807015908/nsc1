@@ -71,6 +71,7 @@
             if (res.data.success) {
               if (res.data.msg === '添加成功') {
                 this.$message({message: res.data.msg, type: 'success'});
+                this.$store.state.socket.emit('sendRemind',{toId:this.searchList[index].userId});
                 this.$emit('update:dialogFlag', false);
                 (async () => {
                   await this.$parent.getFriendGroup();
@@ -134,7 +135,7 @@
         }
       },
       searchUserFuzzily(){
-        this.$http.post('/searchUserFuzzily.do', {idOrName: this.postParams,pageNo:this.pageNow,pageSize:this.$store.state.pageSize}).then(res => {
+        this.$http.post('/searchUserFuzzily.do', {idOrName: this.postParams,pageNo:this.pageNow,pageSize:this.$store.state.pageSize,userId:this.$store.state.userId}).then(res => {
           if (res.data.success) {
             let temp = [];
             this.total=res.data.data.total;

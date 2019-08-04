@@ -206,8 +206,8 @@
         } else {
           let list1 = this.groupsList.createGroup.filter(obj => obj.groupId.indexOf(this.searchParams) !== -1 || obj.groupName.indexOf(this.searchParams) !== -1);
           let list2 = this.groupsList.joinGroup.filter(obj => obj.groupId.indexOf(this.searchParams) !== -1 || obj.groupName.indexOf(this.searchParams) !== -1);
-          console.log(list1);
-          console.log(list2);
+          // console.log(list1);
+          // console.log(list2);
           return list1.concat(list2);
         }
       },
@@ -754,6 +754,11 @@
               }
               span {
                 vertical-align: middle;
+                overflow: hidden;
+                text-overflow:ellipsis;
+                white-space: nowrap;
+                width: 120px;
+                display: inline-block;
               }
             }
             li:hover {

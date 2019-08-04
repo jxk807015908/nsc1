@@ -116,7 +116,9 @@
       }
     },
     mounted() {
+      this.isDestroyed=false;
       this.init();
+      this.listenMessage();
     },
     destroyed(){
       this.isDestroyed=true;
@@ -184,7 +186,6 @@
             })
           }
         });
-
       },
       //用户头像点击，获得用户信息
       imgClick(userId) {
@@ -436,7 +437,6 @@
         }
       },
       init() {
-        this.isDestroyed=false;
         this.messageRecord = [];
         this.detailData='';
         this.pageNo = 1;
@@ -458,12 +458,13 @@
               this.$nextTick(() => {
                 if(this.isShow){
                   this.toTopEvent();
-                  setTimeout(toBottom(this.$refs.message.$el),100);
+                  // setTimeout(toBottom(this.$refs.message.$el),1000);
+                  toBottom(this.$refs.message.$el)
                 }
               });
             })
           }
-          this.listenMessage();
+          // this.listenMessage();
         });
       },
       getFriendMessage() {
@@ -636,12 +637,16 @@
               this.$nextTick(() => {
                 this.$refs.message.$el.scrollTop = this.$refs.message.$el.scrollHeight - scrollBottom;
               });
+            }).catch(()=>{
+              this.pageNo--;
             })
           } else {
             this.getGroupMessage().then(() => {
               this.$nextTick(() => {
                 this.$refs.message.$el.scrollTop = this.$refs.message.$el.scrollHeight - scrollBottom;
               });
+            }).catch(()=>{
+              this.pageNo--;
             })
           }
         })

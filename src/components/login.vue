@@ -326,7 +326,9 @@
   .login{
     height: 100%;
     animation: changeBg 10s infinite;
-    /*background: url("../assets/imgages/loginbg2.jpg");*/
+    background: url("../assets/imgages/1.jpg");
+    background: url("../assets/imgages/2.jpg");
+    background: url("../assets/imgages/3.jpg");
     /*background-size:100% auto;*/
     font-size: 14px;
     img{

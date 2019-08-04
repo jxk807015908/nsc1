@@ -71,6 +71,7 @@
               return
             }
             this.confirmPasswordTip='';
+            this.newPasswordTip='';
           },
           checkNewPassword(){
             if(this.newPassword==='') {
@@ -82,6 +83,7 @@
               return
             }
             this.newPasswordTip='';
+            this.confirmPasswordTip='';
           },
           confirm(){
             if(this.newPasswordTip===''&&this.confirmPasswordTip===''&&this.newPassword!==''&&this.confirmPassword!==''&&this.confirmPassword===this.newPassword){

@@ -43,11 +43,11 @@
           })
         },
         closeVideo(){
-          this.pc.close();
+          this.$store.state.isVideo=false;
+          this.socket.emit('closeVideo',this.other);
           this.videoStreamTrack.stop();
           this.audioStreamTrack.stop();
-          this.socket.emit('closeVideo',this.other);
-          this.$store.state.isVideo=false;
+          this.pc.close();
         },
         videoCall(flag,obj){
           window.URL = (window.URL || window.webkitURL || window.mozURL || window.msURL);
@@ -178,10 +178,10 @@
           });
           this.socket.on('closeVideo',(obj)=>{
             this.$message({message:'对方关闭了视频聊天',type:'success'});
+            this.$store.state.isVideo=false;
             this.pc.close();
             this.videoStreamTrack.stop();
             this.audioStreamTrack.stop();
-            this.$store.state.isVideo=false;
           });
         }
       },
