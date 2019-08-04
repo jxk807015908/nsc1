@@ -4,9 +4,9 @@ exports.searchUserFuzzily = (params, callback) => {
   let connection = databaseSettting.databaseSettting();
   let sql;
   if(params.pageNo !== undefined && params.pageSize !== undefined){
-    sql = `SELECT * FROM User WHERE U_LoginID like "%${params.idOrName}%" or U_NickName like "%${params.idOrName}%" limit ${(params.pageNo-1)*params.pageSize},${params.pageSize}`;
+    sql = `SELECT * FROM User WHERE (U_LoginID like "%${params.idOrName}%" or U_NickName like "%${params.idOrName}%") and U_LoginID != "${params.userId}" limit ${(params.pageNo-1)*params.pageSize},${params.pageSize}`;
   }else{
-    sql = `SELECT * FROM User WHERE U_LoginID like "%${params.idOrName}%" or U_NickName like "%${params.idOrName}%"`;
+    sql = `SELECT * FROM User WHERE (U_LoginID like "%${params.idOrName}%" or U_NickName like "%${params.idOrName}%") and U_LoginID != "${params.userId}"`;
   }
   // let sql=`SELECT * FROM User WHERE U_LoginID like "%${params.idOrName}%" or U_NickName like "%${params.idOrName}%"`;
   // let i=0;

@@ -6,6 +6,7 @@ const path = require('path');
 exports.getFriendMessage = (app) => {
   app.post('/getFriendMessage.do', (req, res) => {
     let isSend = false;
+    let isGetTotal = false;
     let timer;
     res.setTimeout(3000, () => {
       isSend = true;
@@ -56,6 +57,7 @@ exports.getFriendMessage = (app) => {
               })
             } else {
               total = result.length;
+              isGetTotal = true;
             }
           });
           getEachUsMessage.getEachUsMessage({
@@ -110,7 +112,7 @@ exports.getFriendMessage = (app) => {
               });
               //})();
               timer = setInterval(() => {
-                if (imgNumber === 0) {
+                if (imgNumber === 0&&isGetTotal) {
                   (!isSend) && res.send({
                     code: 10000,
                     data: result,

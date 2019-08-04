@@ -18,10 +18,11 @@ exports.searchUserFuzzily = (app) => {
       req.on('end', () => {
         data = decodeURI(data);
         let dataObject = JSON.parse(data);
-        Promise.all([searchUserFuzzilyFn({idOrName: dataObject.idOrName}), searchUserFuzzilyFn({
+        Promise.all([searchUserFuzzilyFn({idOrName: dataObject.idOrName,userId:dataObject.userId}), searchUserFuzzilyFn({
           idOrName: dataObject.idOrName,
           pageNo: dataObject.pageNo,
-          pageSize: dataObject.pageSize
+          pageSize: dataObject.pageSize,
+          userId:dataObject.userId
         })]).then(result => {
           (!isSend) && res.send({
             code: 10000,
